@@ -28,4 +28,6 @@ Excel 导入必须经过上传、解析、映射、预览、校验、确认、�
 
 已确认的工程技术基线为 Node.js 24 LTS、npm、当前稳定版 Next.js、App Router、TypeScript strict、`src/` 目录、ESLint、Tailwind CSS、`@/*` 导入别名、单应用仓库和模块化单体。业务服务默认使用 Node.js Runtime；第一阶段不建立 Monorepo，也不启用 React Compiler。
 
-PostgreSQL、Prisma 的具体版本与配置、可撤销数据库 Session、S3 兼容对象存储、认证框架、Excel 库、部署平台、UI 组件库和后台任务系统仍是候选或后续决策；本任务不实现、不安装。
+数据库可撤销 Session 的架构原则已由 D-011 确认，不是候选方案。Session 表结构、Token 生成与哈希方式、Cookie 配置、过期策略、设备识别和并发实现仍待后续任务设计。
+
+PostgreSQL、Prisma 的具体版本与配置、S3 兼容对象存储、认证框架、Excel 库、部署平台、UI 组件库和后台任务系统仍是候选或后续决策；本任务不实现、不安装。
