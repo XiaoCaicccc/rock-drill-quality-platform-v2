@@ -18,3 +18,7 @@
 | D-012 | 已确认 | 检测任务保存版本和判定规则快照 | 保证任务与历史判定可复现 | 后续版本变化不得改变已有任务 | 运行时读取最新模板或零件版本 | 2026-07-29 |
 | D-013 | 已确认 | 服务端 Excel 解析结果为唯一权威结果 | 避免前后端解析产生不同业务结论 | 保存服务端逐行结果和导入记录 | 前后端双重业务解析 | 2026-07-29 |
 | D-014 | 已确认 | 根 AGENTS.md 与未来模块级 AGENTS.md 构成 Codex 开发护栏 | 同时保持仓库规则统一和模块边界清晰 | 局部规则须服从根规则且保持简短 | 仅靠根规则、以开发历史填充 AGENTS.md | 2026-07-29 |
+| D-015 | 已确认 | 使用 Node.js 24 LTS 与 npm | 使用受支持的 LTS 运行时和唯一包管理器 | 提交 `package-lock.json`，并在 `package.json` 固定 `engines` 与 `packageManager` | Current 或 EOL Node、pnpm、yarn、Bun | 2026-07-29 |
+| D-016 | 已确认 | 使用当前稳定版 Next.js App Router 工程基线 | 提供统一的 V2 Web 工程入口 | 使用 TypeScript strict、`src/`、ESLint、Tailwind CSS、`@/*` 别名；暂不启用 React Compiler | Pages Router、Biome、React Compiler | 2026-07-29 |
+| D-017 | 已确认 | 第一阶段使用单应用仓库 | 在早期保持实现和部署边界清晰 | 在单一应用中维持模块化单体边界，出现真实独立部署需求后再评估拆分 | Monorepo、拆分独立前后端仓库 | 2026-07-29 |
+| D-018 | 已确认 | 业务服务使用 Node.js Runtime | 未来的事务、文件和集成能力不适合 Edge 限制 | Prisma、认证、Excel、文件和事务逻辑不得部署到 Edge；未来 Middleware/Proxy 仅可承担轻量跳转或无数据库判断，最终权限判断仍在服务端 Use Case 执行 | Edge Runtime 业务服务 | 2026-07-29 |

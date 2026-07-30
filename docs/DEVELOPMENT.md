@@ -7,3 +7,9 @@ Git worktree 只用于真正互不依赖、不会修改相同 Schema、公共接
 Migration 只能前进，已应用 Migration 不得修改。正常业务操作不得依赖手工 SQL；Seed 仅用于开发和测试；禁止生产 Setup API。
 
 业务规则变化必须先获得批准、更新相关文档和决策，再修改代码。所有变更仍受根 `AGENTS.md` 约束。
+
+## 工程基线
+
+- 使用 Node.js 24 与 npm；CI 和干净安装必须使用 `npm ci`。
+- `package-lock.json` 必须提交，且不得同时存在 yarn、pnpm 或 Bun 锁文件。
+- Node 或 npm 版本变化必须先新增决策记录；依赖升级必须由独立任务实施。
