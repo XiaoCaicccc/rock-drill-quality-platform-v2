@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-Slice 0B-1（Web 工程骨架）已完成。V2 已具备可安装、可启动、可检查和可构建的 Next.js 工程基础；尚未实现业务模块，尚未接入数据库和认证。
+Slice 0B-2（错误、时间与请求上下文基础）已完成。V2 已具备可安装、可启动、可检查、可构建并可运行纯 TypeScript 单元测试的 Next.js 工程基础，同时建立了错误、时间和 RequestContext 平台模块。Vitest 4.1.10 当前包含 3 个测试文件、11 项通过测试；lint、typecheck、test、build 和 check 均已通过。尚未实现数据库、认证、权限、API Route 或业务模块。
 
 ## 权威入口
 

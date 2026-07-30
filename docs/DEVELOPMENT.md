@@ -13,3 +13,10 @@ Migration 只能前进，已应用 Migration 不得修改。正常业务操作�
 - 使用 Node.js 24 与 npm；CI 和干净安装必须使用 `npm ci`。
 - `package-lock.json` 必须提交，且不得同时存在 yarn、pnpm 或 Bun 锁文件。
 - Node 或 npm 版本变化必须先新增决策记录；依赖升级必须由独立任务实施。
+
+## 测试与平台边界
+
+- 使用 `npm run test` 执行单元测试，使用 `npm run test:watch` 进行本地观察测试；`npm run check` 必须包含测试。
+- 业务代码不得直接读取系统本地时区；未来 Use Case 不得散落 `new Date()` 或 `Date.now()`，应依赖 Clock。
+- Error code 的变更属于公共接口契约变更。
+- 平台模块对外只能通过各自 `index.ts` 导出。

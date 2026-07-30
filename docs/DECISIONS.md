@@ -22,3 +22,7 @@
 | D-016 | 已确认 | 使用当前稳定版 Next.js App Router 工程基线 | 提供统一的 V2 Web 工程入口 | 使用 TypeScript strict、`src/`、ESLint、Tailwind CSS、`@/*` 别名；暂不启用 React Compiler | Pages Router、Biome、React Compiler | 2026-07-29 |
 | D-017 | 已确认 | 第一阶段使用单应用仓库 | 在早期保持实现和部署边界清晰 | 在单一应用中维持模块化单体边界，出现真实独立部署需求后再评估拆分 | Monorepo、拆分独立前后端仓库 | 2026-07-29 |
 | D-018 | 已确认 | 业务服务使用 Node.js Runtime | 未来的事务、文件和集成能力不适合 Edge 限制 | Prisma、认证、Excel、文件和事务逻辑不得部署到 Edge；未来 Middleware/Proxy 仅可承担轻量跳转或无数据库判断，最终权限判断仍在服务端 Use Case 执行 | Edge Runtime 业务服务 | 2026-07-29 |
+| D-019 | 已确认 | 使用稳定、机器可读的统一错误契约 | 使调用方可依赖错误代码而不暴露内部细节 | 公共响应包含 code、message、requestId 与可选 details；未知错误统一隐藏；框架 Adapter 负责实际 HTTP 转换，平台模块不依赖 NextResponse | 以 UI 文案作为错误代码、直接暴露原始异常 | 2026-07-30 |
+| D-020 | 已确认 | 分离 BusinessDate、Instant 与 Clock | 避免日期、时间点和运行时当前时间混用 | 企业时区固定为 Asia/Shanghai；Instant 规范化为 UTC；有效区间保持 [from, to)；Use Case 通过 Clock 获取当前时间，不依赖运行环境本地时区 | 服务器本地时区、散落的 Date.now() | 2026-07-30 |
+| D-021 | 已确认 | 显式传递 RequestContext | 保持请求元数据可追踪并避免全局可变状态 | Context 包含 requestId、receivedAt、businessTimeZone 与 actor；不保存密码、Token、Cookie、角色或权限快照；Transport Adapter、Use Case 与审计未来共享同一 Context | 全局请求上下文、权限快照 | 2026-07-30 |
+| D-022 | 已确认 | 使用 Vitest 作为纯 TypeScript 单元测试基线 | 为领域规则和平台纯函数提供快速、确定性的 Node 测试 | 测试文件为 *.test.ts；固定 Clock 和 RequestId factory 用于确定性测试；不自动引入浏览器测试工具；Mock 不能替代真实 PostgreSQL 行为证明 | Jest、浏览器环境测试作为默认基线 | 2026-07-30 |
