@@ -20,6 +20,16 @@ describe("RequestContext", () => {
     expect(context.requestId).toBe("request-fixed");
   });
 
+  it("keeps only the explicitly allowed authenticated actor fields", () => {
+    const input = { kind: "user" as const, userId: "user-1", sessionId: "session-1", organizationId: "org-1", organizationUnitId: null, token: "secret", cookie: "session=secret", roles: ["admin"], permissions: ["all"] };
+    const actor = createAuthenticatedActor(input);
+    const context = createRequestContext({ actor: input, clock: fixedClock, requestIdFactory: fixedRequestId });
+    expect(actor).toEqual({ kind: "user", userId: "user-1", sessionId: "session-1", organizationId: "org-1", organizationUnitId: null });
+    expect(context.actor).toEqual(actor);
+    expect(actor).not.toHaveProperty("token");
+    expect(context.actor).not.toHaveProperty("roles");
+  });
+
   it("rejects empty authenticated actor identifiers", () => {
     const base = { kind: "user" as const, userId: "user-1", sessionId: "session-1", organizationId: "org-1", organizationUnitId: "unit-1" };
     expect(() => createAuthenticatedActor({ ...base, userId: "" })).toThrow(RangeError);

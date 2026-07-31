@@ -3,8 +3,10 @@ export type BusinessDate = string & { readonly [businessDateBrand]: "BusinessDat
 const businessDatePattern = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 function hasValidCalendarDate(year: number, month: number, day: number): boolean {
-  if (month < 1 || month > 12 || day < 1) return false;
-  return day <= new Date(Date.UTC(year, month, 0)).getUTCDate();
+  if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1) return false;
+  const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= daysInMonth[month - 1];
 }
 
 export function isBusinessDate(value: string): value is BusinessDate {

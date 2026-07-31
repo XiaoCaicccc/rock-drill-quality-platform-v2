@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AppError, isAppError, toErrorResponse } from "./index";
+import type { JsonObject } from "./index";
 
 describe("platform errors", () => {
   it("maps a known AppError to its safe public response", () => {
@@ -24,6 +25,25 @@ describe("platform errors", () => {
     expect(serialized).not.toContain("private cause");
     expect(serialized).not.toContain("stack");
     expect(serialized).not.toContain("details");
+  });
+
+  it("stores details as an immutable snapshot", () => {
+    const details = { resource: "part", nested: { fields: ["diameter"] } };
+    const error = new AppError({ code: "RESOURCE.NOT_FOUND", httpStatus: 404, internalMessage: "Private.", publicMessage: "未找到请求的资源。", details });
+    details.resource = "changed";
+    details.nested.fields.push("secret");
+    const response = toErrorResponse(error, "request-4");
+    expect(response.body.error.details).toEqual({ resource: "part", nested: { fields: ["diameter"] } });
+    expect(Object.isFrozen(error.details)).toBe(true);
+    expect(Object.isFrozen(error.details?.nested)).toBe(true);
+    expect(Object.isFrozen(error.details?.nested && (error.details.nested as { fields: readonly string[] }).fields)).toBe(true);
+  });
+
+  it("rejects sensitive values and unsafe detail objects", () => {
+    const unsafeDetails: unknown[] = [{ token: "secret" }, { password: "secret" }, { cookie: "secret" }, { source: "postgresql://user:secret@host/database" }, { error: new Error("private") }];
+    for (const details of unsafeDetails) {
+      expect(() => new AppError({ code: "PLATFORM.VALIDATION_FAILED", httpStatus: 400, internalMessage: "Private.", publicMessage: "无效。", details: details as JsonObject })).toThrow(TypeError);
+    }
   });
 
   it("rejects illegal error status values", () => {

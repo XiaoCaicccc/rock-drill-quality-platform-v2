@@ -12,7 +12,13 @@ export function createAuthenticatedActor(actor: AuthenticatedActor): Authenticat
   assertNonEmpty(actor.sessionId, "sessionId");
   assertNonEmpty(actor.organizationId, "organizationId");
   if (actor.organizationUnitId !== null) assertNonEmpty(actor.organizationUnitId, "organizationUnitId");
-  return Object.freeze({ ...actor });
+  return Object.freeze({
+    kind: "user",
+    userId: actor.userId,
+    sessionId: actor.sessionId,
+    organizationId: actor.organizationId,
+    organizationUnitId: actor.organizationUnitId,
+  });
 }
 
 export function normalizeActor(actor: Actor): Actor { return actor.kind === "anonymous" ? anonymousActor : createAuthenticatedActor(actor); }

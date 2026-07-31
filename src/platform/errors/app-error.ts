@@ -8,26 +8,34 @@ function isJsonPrimitive(value: unknown): value is boolean | null | number | str
   return value === null || typeof value === "boolean" || typeof value === "string" || (typeof value === "number" && Number.isFinite(value));
 }
 
-function assertSafeJsonValue(value: unknown, seen: Set<object>): asserts value is JsonValue {
+function createSafeJsonSnapshot(value: unknown, seen: Set<object>): JsonValue {
   if (isJsonPrimitive(value)) {
     if (typeof value === "string" && databaseConnectionString.test(value)) throw new TypeError("Error details must not contain database connection strings.");
-    return;
+    return value;
   }
   if (Array.isArray(value)) {
     if (seen.has(value)) throw new TypeError("Error details must not contain circular references.");
     seen.add(value);
-    for (const item of value) assertSafeJsonValue(item, seen);
+    const snapshot = value.map((item) => createSafeJsonSnapshot(item, seen));
     seen.delete(value);
-    return;
+    return Object.freeze(snapshot);
   }
   if (typeof value !== "object" || value === null || Object.getPrototypeOf(value) !== Object.prototype) throw new TypeError("Error details must be JSON-safe data.");
   if (seen.has(value)) throw new TypeError("Error details must not contain circular references.");
   seen.add(value);
+  const snapshot: Record<string, JsonValue> = {};
   for (const [key, item] of Object.entries(value)) {
     if (forbiddenDetailKey.test(key)) throw new TypeError("Error details must not contain sensitive data.");
-    assertSafeJsonValue(item, seen);
+    snapshot[key] = createSafeJsonSnapshot(item, seen);
   }
   seen.delete(value);
+  return Object.freeze(snapshot);
+}
+
+function createSafeDetailsSnapshot(details: JsonObject): JsonObject {
+  const snapshot = createSafeJsonSnapshot(details, new Set<object>());
+  if (typeof snapshot !== "object" || snapshot === null || Array.isArray(snapshot)) throw new TypeError("Error details must be a JSON object.");
+  return snapshot as JsonObject;
 }
 
 function assertErrorHttpStatus(httpStatus: number): void {
@@ -43,14 +51,14 @@ export class AppError extends Error {
 
   public constructor(options: AppErrorOptions) {
     assertErrorHttpStatus(options.httpStatus);
-    if (options.details !== undefined) assertSafeJsonValue(options.details, new Set<object>());
+    const details = options.details === undefined ? undefined : createSafeDetailsSnapshot(options.details);
     super(options.internalMessage, { cause: options.cause });
     this.name = "AppError";
     this.code = options.code;
     this.httpStatus = options.httpStatus;
     this.internalMessage = options.internalMessage;
     this.publicMessage = options.publicMessage;
-    this.details = options.details;
+    this.details = details;
   }
 }
 
