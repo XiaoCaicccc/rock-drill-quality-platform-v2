@@ -31,3 +31,11 @@ Excel 导入必须经过上传、解析、映射、预览、校验、确认、�
 数据库可撤销 Session 的架构原则已由 D-011 确认，不是候选方案。Session 表结构、Token 生成与哈希方式、Cookie 配置、过期策略、设备识别和并发实现仍待后续任务设计。
 
 PostgreSQL、Prisma 的具体版本与配置、S3 兼容对象存储、认证框架、Excel 库、部署平台、UI 组件库和后台任务系统仍是候选或后续决策；本任务不实现、不安装。
+
+## 平台基础模块
+
+`Error Handling` 提供稳定错误代码、`AppError` 和框架无关的安全公共错误响应。Transport Adapter 未来只负责将该响应转换为实际 HTTP Response；业务 Use Case 不依赖 Transport API，未知错误不得公开原始信息。
+
+`Time` 明确区分业务日历日期（BusinessDate）、精确时间点（UTC Instant）和有效区间；有效区间遵循 `[from, to)`。企业业务时区固定为 `Asia/Shanghai`，Use Case 通过 `Clock` 获取当前时间，不能以运行环境本地时区为业务依据。
+
+`RequestContext` 显式传递 `requestId`、`receivedAt`、`businessTimeZone` 和联合类型 `actor`。它不保存权限快照、密码、Token 或 Cookie；未来 Transport Adapter、Use Case 和审计可共享同一个 Context。errors、time 和 request-context 均不依赖 Next.js Transport API，且 request-context 仅通过 time 的公开入口依赖 time。
