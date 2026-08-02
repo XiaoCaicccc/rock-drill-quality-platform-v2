@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-Slice 0B-3 已完成：V2 数据库基础采用 PostgreSQL 17 与 Prisma 6.19.3。`DATABASE_URL` 仅供正式运行 Client 使用，`TEST_DATABASE_URL` 仅供真实 PostgreSQL 集成测试 Client 使用；二者严格分离，开发环境通过 `globalThis` 复用正式 Client。当前普通测试基线为 4 个文件、16 项测试，数据库测试基线为 DB-01 至 DB-04；没有业务 Model 或 Migration，也没有认证、权限、Session、API Route、健康检查或 CI。
+Slice 0B-3 已完成：V2 数据库基础采用 PostgreSQL 17 与 Prisma 6.19.3。`DATABASE_URL` 仅供正式运行 Client 使用，`TEST_DATABASE_URL` 仅供真实 PostgreSQL 集成测试 Client 使用；二者严格分离，开发环境通过 `globalThis` 复用正式 Client。当前普通测试基线为 4 个文件、17 项测试，数据库测试基线为 DB-01 至 DB-04；没有业务 Model 或 Migration，也没有认证、权限、Session、API Route、健康检查或 CI。
 
 ## 权威入口
 
