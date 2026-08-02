@@ -30,7 +30,7 @@ Excel 导入必须经过上传、解析、映射、预览、校验、确认、�
 
 数据库可撤销 Session 的架构原则已由 D-011 确认，不是候选方案。Session 表结构、Token 生成与哈希方式、Cookie 配置、过期策略、设备识别和并发实现仍待后续任务设计。
 
-V2 数据库基础使用 PostgreSQL 17 与 Prisma。数据库连接仅从运行时环境变量 `TEST_DATABASE_URL` 读取；连接串、用户名、密码、主机与端口不得写入已跟踪文件、日志或提交。当前 Slice 仅建立不含业务表和业务 Migration 的 Prisma 基础，以及真实 PostgreSQL 事务集成测试；业务 Schema、认证框架、S3 兼容对象存储、Excel 库、部署平台、UI 组件库和后台任务系统仍是候选或后续决策。
+V2 数据库基础使用 PostgreSQL 17 与 Prisma 6.19.3。正式 Prisma schema 和 `getPrismaClient()` 仅读取 `DATABASE_URL`，用于未来开发和应用运行；`createTestPrismaClient()` 仅读取 `TEST_DATABASE_URL`，并通过 Prisma datasource 覆盖仅供真实集成测试使用。两个变量不得回退或互用，连接串、用户名、密码、主机与端口不得写入已跟踪文件、日志或提交。正式 Client 在开发环境缓存于 `globalThis` 以避免 Next.js 热重载重复创建连接池，生产环境维持正常生命周期；模块导入不主动连接，且不建立全局隐式事务。当前 Slice 不含业务表、业务 Model 或业务 Migration；业务 Schema、认证框架、S3 兼容对象存储、Excel 库、部署平台、UI 组件库和后台任务系统仍是候选或后续决策。
 
 ## 平台基础模块
 

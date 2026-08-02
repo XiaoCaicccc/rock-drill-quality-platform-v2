@@ -10,4 +10,4 @@
 
 `npm run check` 必须包含 lint、typecheck、test 和 build。
 
-数据库基础集成测试通过 `npm run test:db` 在真实 PostgreSQL 上运行，并仅从 `TEST_DATABASE_URL` 读取连接信息。该测试必须验证 PostgreSQL 主版本为 17、Prisma 事务提交与回滚行为，以及临时测试表在 `finally` 中清理；连接信息不得写入日志或已跟踪文件。
+数据库基础集成测试通过 `npm run test:db` 在真实 PostgreSQL 17 上运行，并仅从 `TEST_DATABASE_URL` 读取连接信息；测试代码不得回退读取 `DATABASE_URL`。测试 Client 必须独立于正式 Client，并通过 Prisma datasource 覆盖连接。DB-01 至 DB-04 必须使用固定、专用测试 Schema 和测试表，以参数绑定测试行标识验证 PostgreSQL 主版本、Prisma 事务提交、异常回滚及 Schema、表和测试行清理；所有异常路径均在 `finally` 清理，且不得使用 Unsafe Raw SQL 或操作业务表。连接信息不得写入日志或已跟踪文件。

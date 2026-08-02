@@ -11,3 +11,5 @@ Slice 0B-2（错误、时间与请求上下文基础）已完成。V2 已具备�
 产品范围见 [docs/PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md)，当前事实状态见 [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md)，工作授权入口见 [docs/ACTIVE_PLAN.md](docs/ACTIVE_PLAN.md)，架构与领域原则分别见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) 和 [docs/DOMAIN_MODEL.md](docs/DOMAIN_MODEL.md)。完整文档治理规则见 [docs/README.md](docs/README.md)。
 
 只有存在获授权的 ACTIVE_PLAN 时才可直接开发业务代码。
+
+数据库基础使用 PostgreSQL 17 与 Prisma 6.19.3：正式运行数据库变量为 `DATABASE_URL`，真实集成测试变量为 `TEST_DATABASE_URL`。二者严格分离，不得回退或互用；当前没有业务 Model、Migration、认证、权限、Session、API Route、健康检查或 CI。
