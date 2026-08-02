@@ -1,1 +1,1 @@
-export { createTestPrismaClient, getPrismaClient } from "./prisma-client";
+export { getPrismaClient } from "./prisma-client";

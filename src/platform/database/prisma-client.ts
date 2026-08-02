@@ -5,18 +5,22 @@ type PrismaGlobal = {
 };
 
 const prismaGlobal = globalThis as typeof globalThis & PrismaGlobal;
+let runtimePrismaClient: PrismaClient | undefined;
 
 export function getPrismaClient(): PrismaClient {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required for runtime database access.");
   }
 
-  if (process.env.NODE_ENV === "production") {
-    return new PrismaClient();
+  runtimePrismaClient ??= process.env.NODE_ENV === "development"
+    ? prismaGlobal.prismaClient ?? new PrismaClient()
+    : new PrismaClient();
+
+  if (process.env.NODE_ENV === "development") {
+    prismaGlobal.prismaClient = runtimePrismaClient;
   }
 
-  prismaGlobal.prismaClient ??= new PrismaClient();
-  return prismaGlobal.prismaClient;
+  return runtimePrismaClient;
 }
 
 export function createTestPrismaClient(): PrismaClient {

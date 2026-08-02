@@ -32,3 +32,14 @@ it("does not use DATABASE_URL as a test database fallback", () => {
 
   expect(createTestPrismaClient).toThrow("TEST_DATABASE_URL is required for database integration tests.");
 });
+
+it("returns the same runtime client instance without connecting", async () => {
+  process.env.DATABASE_URL = "postgresql://user:password@localhost:5432/runtime_database";
+
+  const firstClient = getPrismaClient();
+  const secondClient = getPrismaClient();
+
+  expect(secondClient).toBe(firstClient);
+
+  await firstClient.$disconnect();
+});
