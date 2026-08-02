@@ -2,12 +2,10 @@
 
 ## Status: NO ACTIVE IMPLEMENTATION PLAN
 
-当前没有获授权的实施计划。未经新的明确授权，不得开始下一阶段实施工作。
-
 ## Previous completed plan
 
-Slice 0B-2 — Error, Time and Request Context Foundation
+Slice 0B-3 — PostgreSQL, Prisma and Real Database Test Foundation
 
 Commit: pending final commit
 
-该任务及其 PR 审阅修正已建立并加固错误、时间和 RequestContext 平台基础；未实现数据库、认证、权限、API Route 或业务模块。后续计划必须遵守 `PRODUCT_SCOPE.md`、`DECISIONS.md`、`DOMAIN_MODEL.md` 和 `ARCHITECTURE.md`，且需要用户明确授权后才能成为活动计划。
+Slice 0B-3 已建立 PostgreSQL 17 与 Prisma 6.19.3 数据库基础设施、真实 PostgreSQL 集成测试及数据库维护脚本。该 Slice 未创建业务 Model、业务 Migration 或空 Migration，未实现认证、权限、Session、API Route、健康检查或 CI，且未进入 Slice 0B-4。后续工作必须遵守 `PRODUCT_SCOPE.md`、`DECISIONS.md`、`DOMAIN_MODEL.md` 和 `ARCHITECTURE.md`，并获得新的明确授权。
