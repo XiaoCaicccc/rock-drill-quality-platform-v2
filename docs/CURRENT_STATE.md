@@ -10,6 +10,6 @@ Slice 0B-3 已完成：数据库基础采用 PostgreSQL 17.10 与 Prisma 6.19.3�
 
 最终验证已通过：`npm run db:validate`、`npm run db:generate`、`npm run check:full` 和 `npm run build`。普通测试为 4 个文件、17/17 tests passed；真实 PostgreSQL 数据库测试为 1 个文件、DB-01 至 DB-04 共 4/4 tests passed，覆盖 PostgreSQL 主版本 17、transaction commit、transaction rollback 和 cleanup。数据库测试使用固定专用 Schema、固定测试表和参数化测试行标识，已全部移除 Unsafe Raw SQL。
 
-Slice 0B-4 正在实施：GitHub Actions CI 位于 `.github/workflows/ci.yml`，在针对 `master` 的 pull request、推送到 `master` 及手动触发时运行。CI 使用 Node.js 24.18.0、npm 和隔离的 PostgreSQL 17 service container，执行 `db:validate`、`db:generate` 与 `check:full`。`GET /api/health` 位于 `src/app/api/health/route.ts`，是无数据库依赖、无 Prisma Client 的 Node.js liveness endpoint；等待本地真实 PostgreSQL 验证后才可关闭本 Slice。
+Slice 0B-4 已完成：GitHub Actions CI 位于 `.github/workflows/ci.yml`，在针对 `master` 的 pull request、推送到 `master` 及手动触发时运行。CI 使用 Node.js 24.18.0、npm 和隔离的 PostgreSQL 17 service container，已成功执行 `db:validate`、`db:generate` 与 `check:full`。`GET /api/health` 是无数据库依赖、无 Prisma Client 的 Node.js liveness endpoint；GitHub Actions verify 已通过，Vercel Preview 为 Ready。
 
-普通测试为 5 个文件、18/18 tests passed；真实 PostgreSQL 数据库测试仍为 1 个文件、DB-01 至 DB-04 共 4/4 tests passed。当前仍没有业务 Model、业务 Migration 或空 Migration，也没有认证、权限或 Session；`.env` 和本地连接信息未进入 Git。
+普通测试为 5 个文件、18/18 tests passed；真实 PostgreSQL 数据库测试为 1 个文件、DB-01 至 DB-04 共 4/4 tests passed。当前仍没有业务 Model、业务 Migration 或空 Migration，也没有认证、权限或 Session；`.env` 和本地连接信息未进入 Git。
