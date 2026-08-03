@@ -4,15 +4,13 @@
 
 ## Previous completed plan
 
-Slice 0B-4 — CI, health check, and deployment runtime baseline
+V2 implementation roadmap and module ownership freeze
 
-Closure evidence:
+完成证据：
 
-- GitHub Actions `verify` passed.
-- Node.js 24.18.0 and npm 11.12.1 were used.
-- The PostgreSQL 17 service container started successfully and ran the real database tests.
-- Ordinary tests passed: 5 files, 18/18 tests.
-- Database tests passed: DB-01 through DB-04, 4/4 tests.
-- Production build passed.
-- Vercel Preview is Ready.
-- `GET /api/health` was verified successfully.
+- PR #4 GitHub Actions 全部通过；
+- Vercel Preview Ready；
+- 路线 Slice 0～8 已冻结；
+- 平台模块与业务模块归属已冻结；
+- 开源参考与 Slice 映射已冻结；
+- 未修改领域模型、数据库或源码。

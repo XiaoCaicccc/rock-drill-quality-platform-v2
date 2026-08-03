@@ -2,12 +2,12 @@
 
 本文件仅分类记录尚未授权的范围外工作，不展开为实施任务。
 
-- PLM Future
-- Quality Future
-- QR and Labels
-- Account Security
-- Mobile Experience
-- Integrations
+- PLM Future：完整 BOM、ECN / ECO。
+- Quality Future：完整 NCR / CAPA。
+- Mobile Experience：原生移动 App。
+- Integrations：IoT、完整 ERP 集成、供应商门户。
+- Multi-tenancy。
+- Advanced predictive analytics。
 - V1 Known Issues
 - Documentation and Process Improvements
 
