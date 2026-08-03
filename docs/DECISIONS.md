@@ -28,3 +28,25 @@
 | D-022 | 已确认 | 使用 Vitest 作为纯 TypeScript 单元测试基线 | 为领域规则和平台纯函数提供快速、确定性的 Node 测试 | 测试文件为 *.test.ts；固定 Clock 和 RequestId factory 用于确定性测试；不自动引入浏览器测试工具；Mock 不能替代真实 PostgreSQL 行为证明 | Jest、浏览器环境测试作为默认基线 | 2026-07-30 |
 | D-023 | 已确认 | V2 数据库基线采用 PostgreSQL 17 与 Prisma 6.19.3 | 为正式运行和真实事务验证建立明确、受支持且隔离的数据库基础 | 正式 Prisma schema 与 `getPrismaClient()` 只使用 `DATABASE_URL`；集成测试的 `createTestPrismaClient()` 只使用 `TEST_DATABASE_URL` 并通过 Prisma datasource 覆盖连接；两者不得回退或互用。开发环境复用 globalThis 中的正式 Client，测试 Client 不进入该单例。Migration 只能向前，生产只运行 `prisma migrate deploy`；当前没有业务 Model 或 Migration。连接信息不得写入已跟踪文件、日志或提交 | PostgreSQL 16 基线、混用运行与测试连接、以 Mock 代替真实 PostgreSQL 事务验证、生产使用 db push | 2026-08-02 |
 | D-024 | 已确认 | 使用 GitHub Actions 作为当前 CI 基线，Vercel 仅作 Preview 平台 | 让代码质量和真实数据库测试与 Preview 部署职责分离 | GitHub Actions 使用 PostgreSQL 17 service container 运行真实数据库测试；`GET /api/health` 是不依赖数据库的 liveness endpoint；部署平台不属于业务架构且可替换 | 以 Preview 部署替代 CI、将健康检查与数据库就绪检查耦合 | 2026-08-03 |
+
+## D-025 — V2 first-stage implementation roadmap and module ownership
+
+状态：已确认（Accepted）
+日期：2026-08-03
+
+### Context
+
+- 原有 Slice 0～5 是立项前的粗粒度草案；产品范围、组织、数据库 Session、权限、模板版本、Excel 导入、批次实物、任务快照、纠正、QR 和移动端要求已经细化。本决策发生在 Slice 0 工程底座完成之后。
+- 继续依赖聊天记忆会造成模块归属和任务边界漂移。
+
+### Decision
+
+- 采用 `PRODUCT_SCOPE.md` 中的 Slice 0～8 实施顺序；实际完成状态和当前下一项只以 `CURRENT_STATE.md` 为唯一依据，`PRODUCT_SCOPE.md` 不负责维护动态完成状态。
+- Organization 归属 `src/platform/organization`；`src/modules` 仅用于具体 PLM 和质量业务模块。
+- 不强制通用 Repository；`ARCHITECTURE.md` 中的开源参考映射作为设计输入索引。
+- 路线变更必须通过新的决策和权威文档修改，不以聊天内容直接覆盖。
+
+### Consequences
+
+- 后续 Codex 提示词必须引用对应 Slice；一个任务只能交付一个清晰目标，且不允许提前进入后续 Slice。
+- 旧粗粒度路线仅保留为 Historical / superseded 背景，不再驱动开发；不新增 `ROADMAP.md`，避免文档职责重复。

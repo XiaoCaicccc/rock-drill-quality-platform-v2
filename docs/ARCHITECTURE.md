@@ -43,3 +43,54 @@ V2 数据库基础使用 PostgreSQL 17 与 Prisma 6.19.3。正式 Prisma schema 
 ## CI 与部署运行边界
 
 GitHub Actions 是当前仓库的 CI 基线，负责代码质量和真实 PostgreSQL 测试；Vercel 是当前 Next.js Preview 部署平台。部署平台不是业务架构的一部分，后续可以替换。`GET /api/health` 使用 Node.js runtime，仅提供无数据库依赖的 liveness 信号，不是 readiness 或业务状态检查。
+
+## 模块归属与目标路径
+
+平台模块的长期目标路径为 `src/platform/`：`errors`、`time`、`request-context`、`database`、`organization`、`identity-session`、`authorization`、`audit`、`numbering`、`qr-access`、`file-metadata`、`import` 和 `observability`。Organization 属于平台模块；Slice 1A 的正确目标路径是 `src/platform/organization`，不属于 `src/modules` 下的普通业务模块。Identity、Session、Authorization 和 Audit 也属于平台模块。
+
+业务模块的长期目标路径为 `src/modules/`：`part-category`、`part-master`、`part-revision`、`supplier-relation`、`equipment`、`batch`、`part-instance`、`installation`、`inspection-template`、`inspection-task`、`inspection`、`quality-ledger`、`correction`、`nonconformance` 和 `report`。具体目录只在对应 Slice 开始时创建，不提前建立大量空目录。模块外只能通过正式公共入口使用能力；API 和 UI 不得直接操作 Prisma Model，Prisma 类型不得扩散为跨模块公共契约。
+
+领域层不得依赖 Prisma、Next.js 或 React；应用层不得依赖 Next.js 页面和路由；基础设施层可以依赖 Prisma；`app` 层组合应用能力；平台模块不得反向依赖具体 PLM 或质量业务模块。
+
+## Repository 规则
+
+不强制所有模块创建通用 Repository，也不创建仅转发 Prisma CRUD 的万能 Repository。只有持久化语义、测试替换、复杂查询或模块边界确实需要时，才建立模块内部端口。应用用例可通过受控的 Prisma Transaction Client 或窄接口完成事务；具体选择由对应 Slice 的设计和测试证明。
+
+## 平台能力主要实施位置
+
+该映射表示各平台能力首次建立的主要位置；后续 Slice 可以复用和扩展。不得因为某项未在路线中单独命名，就静默丢失平台模块。
+
+| 平台能力 | 首次主要实施 Slice |
+| --- | --- |
+| errors | Slice 0B-2 |
+| time | Slice 0B-2 |
+| request-context | Slice 0B-2 |
+| database | Slice 0B-3 |
+| organization | Slice 1A |
+| identity-session | Slice 1B |
+| authorization | Slice 1C |
+| audit | Slice 1D |
+| numbering | Slice 2A |
+| file-metadata | Slice 3B |
+| import | Slice 3B |
+| qr-access | Slice 7C |
+| observability | Slice 8C |
+
+## 开源设计参考与 Slice 映射
+
+此处是开源设计参考映射的唯一权威定义。
+
+| 参考项目 | 借鉴范围 | 主要 Slice 映射 |
+| --- | --- | --- |
+| Carbon | 权限上下文、RBAC / ABAC、查询契约、审计、API 边界、检测任务快照、导入流程、AGENTS 护栏 | 0A、1C、3B、5A、6A |
+| InvenTree | Part / Revision、分类、批次、序列号、实物、安装关系、条码与追溯 | 2A、2B、4A、4B、4C、7C |
+| Cascadia PLM | Master / Revision 身份分离、状态转换、审批记录、发布前置条件、审计轨迹 | 2B、3A、7B |
+| ERPNext | Quality Inspection 概念、编号与来源、审批思路、不合格与 CAPA 术语 | 2A、3A、5、6C |
+| Part-DB | 分类、参数组织、附件、标签、QR、搜索、移动访问 | 2A、3A、3B、7C、8B |
+| Cal.com / Cal.diy | TypeScript 项目组织、应用与基础设施边界、CI、模块工程规范 | 0A、0B 及后续所有 Slice 的工程组织 |
+
+Cal.com / Cal.diy 仅是工程组织参考，不是 PLM 或质量业务模型来源；不得从其推导零件、检测、质量或审批业务规则。BOM、ECN、ECO 和完整 CAPA 仍只进入未来 Backlog，不进入第一阶段。
+
+### 开源使用边界
+
+只借鉴设计思想、信息架构和工程模式，不复制第三方业务源码或无法确认许可证兼容性的实现。正常开源依赖按其许可证使用；本项目业务规则必须由本项目文档、真实业务材料和验收测试定义。
