@@ -9,3 +9,5 @@
 纯 TypeScript 平台模块使用 Vitest，默认运行于 Node 环境，测试文件使用 `*.test.ts`。固定 Clock 和固定 RequestId factory 是确定性测试手段。Mock 不能替代 PostgreSQL 事务、约束和并发的真实测试；后续关键数据库行为仍须按本策略验证。
 
 `npm run check` 必须包含 lint、typecheck、test 和 build。
+
+数据库基础集成测试通过 `npm run test:db` 在真实 PostgreSQL 17 上运行，并仅从 `TEST_DATABASE_URL` 读取连接信息；测试代码不得回退读取 `DATABASE_URL`。测试 Client 必须独立于正式 Client，并通过 Prisma datasource 覆盖连接。DB-01 至 DB-04 必须使用固定、专用测试 Schema 和测试表，以参数绑定测试行标识验证 PostgreSQL 主版本、Prisma 事务提交、异常回滚及 Schema、表和测试行清理；所有异常路径均在 `finally` 清理，且不得使用 Unsafe Raw SQL 或操作业务表。连接信息不得写入日志或已跟踪文件。

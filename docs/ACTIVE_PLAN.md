@@ -2,12 +2,18 @@
 
 ## Status: NO ACTIVE IMPLEMENTATION PLAN
 
-当前没有获授权的实施计划。未经新的明确授权，不得开始下一阶段实施工作。
-
 ## Previous completed plan
 
-Slice 0B-2 — Error, Time and Request Context Foundation
+Slice 0B-3 — PostgreSQL, Prisma and Real Database Test Foundation
 
-Commit: pending final commit
+Review remediation:
 
-该任务及其 PR 审阅修正已建立并加固错误、时间和 RequestContext 平台基础；未实现数据库、认证、权限、API Route 或业务模块。后续计划必须遵守 `PRODUCT_SCOPE.md`、`DECISIONS.md`、`DOMAIN_MODEL.md` 和 `ARCHITECTURE.md`，且需要用户明确授权后才能成为活动计划。
+PR #2 database foundation separation and safety hardening completed.
+
+Lockfile remediation:
+
+Vercel and local installs both reported npm `Invalid Version`; the previous `package-lock.json` was identified as anomalous and rebuilt cleanly with npm 11.12.1. Local npm ci and check:full passed. The latest Vercel Preview installed with npm ci and deployed successfully. PR #2 database foundation, safety boundaries, and portable lockfile remediation are complete.
+
+Closure evidence:
+
+PR #2 and repository Git history
