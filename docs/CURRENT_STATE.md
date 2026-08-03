@@ -12,4 +12,4 @@ Slice 0B-3 已完成：数据库基础采用 PostgreSQL 17.10 与 Prisma 6.19.3�
 
 Slice 0B-4 已完成：GitHub Actions CI 位于 `.github/workflows/ci.yml`，在针对 `master` 的 pull request、推送到 `master` 及手动触发时运行。CI 使用 Node.js 24.18.0、npm 和隔离的 PostgreSQL 17 service container，已成功执行 `db:validate`、`db:generate` 与 `check:full`。`GET /api/health` 是无数据库依赖、无 Prisma Client 的 Node.js liveness endpoint；GitHub Actions verify 已通过，Vercel Preview 为 Ready。
 
-普通测试为 5 个文件、18/18 tests passed；真实 PostgreSQL 数据库测试为 1 个文件、DB-01 至 DB-04 共 4/4 tests passed。当前正在进行纯文档路线冻结，Slice 1A 尚未开始。当前仍没有 Organization、Account、Session、Authorization 或业务 Model，也没有业务 Migration 或空 Migration；`.env` 和本地连接信息未进入 Git。之前生成的旧 Slice 1A 提示词未实施，且不作为权威输入；路线冻结合并后，下一项才是修正版 Slice 1A。
+普通测试为 5 个文件、18/18 tests passed；真实 PostgreSQL 数据库测试为 1 个文件、DB-01 至 DB-04 共 4/4 tests passed。V2 第一阶段 Slice 0～8 路线已冻结，Slice 0A、0B-1、0B-2、0B-3、0B-4 已完成；当前没有活动实施计划。下一项计划为 Slice 1A：组织层级，且尚未开始。当前仍没有 Organization、OrgUnit、Account、Session、Authorization 或其他业务 Model，也没有业务 Migration 或空 Migration；`.env` 和本地连接信息未进入 Git。修正版 Slice 1A 必须以 `PRODUCT_SCOPE.md`、`ARCHITECTURE.md` 和 `DECISIONS.md` 中的冻结内容为依据；Organization 的目标路径为 `src/platform/organization`。
