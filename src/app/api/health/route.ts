@@ -1,0 +1,8 @@
+export const runtime = "nodejs";
+
+export function GET(): Response {
+  return Response.json({
+    status: "ok",
+    service: "rock-drill-quality-platform-v2",
+  });
+}

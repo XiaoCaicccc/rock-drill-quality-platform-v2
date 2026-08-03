@@ -1,19 +1,36 @@
 # ACTIVE PLAN
 
-## Status: NO ACTIVE IMPLEMENTATION PLAN
+## Slice 0B-4 — CI, health check, and deployment runtime baseline
 
-## Previous completed plan
+## Status: ACTIVE
 
-Slice 0B-3 — PostgreSQL, Prisma and Real Database Test Foundation
+## Sole objective
 
-Review remediation:
+Establish the CI, health check, and deployment runtime baseline.
 
-PR #2 database foundation separation and safety hardening completed.
+## Scope
 
-Lockfile remediation:
+- Add GitHub Actions CI for pull requests to and pushes on `master`.
+- Run the existing PostgreSQL 17 integration tests in CI using an isolated service container.
+- Add the Node.js liveness endpoint at `GET /api/health` and its Vitest coverage.
+- Update the existing authoritative documentation to reflect the implemented baseline.
 
-Vercel and local installs both reported npm `Invalid Version`; the previous `package-lock.json` was identified as anomalous and rebuilt cleanly with npm 11.12.1. Local npm ci and check:full passed. The latest Vercel Preview installed with npm ci and deployed successfully. PR #2 database foundation, safety boundaries, and portable lockfile remediation are complete.
+## Non-goals
 
-Closure evidence:
+- No Slice 1 work or business modules.
+- No organization, account, authorization, session, authentication, migration, or business model work.
+- No readiness endpoint, database probe, monitoring SDK, Dockerfile, or Vercel configuration change.
+- No PostgreSQL, Prisma, Node.js, npm, or dependency version changes.
 
-PR #2 and repository Git history
+## Acceptance commands
+
+- `npm.cmd run db:validate`
+- `npm.cmd run db:generate`
+- `npm.cmd run check:full`
+- `git diff --check`
+- `git status --short`
+- Production build, local production-server request to `GET /api/health`, then clean server shutdown.
+
+## Boundary
+
+This plan authorizes only Slice 0B-4. It does not enter Slice 1 or any business module.

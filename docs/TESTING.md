@@ -10,4 +10,8 @@
 
 `npm run check` 必须包含 lint、typecheck、test 和 build。
 
+GitHub Actions 是针对 `master` 的 pull request 和推送到 `master` 的自动质量门，也可手动触发。CI 使用隔离的 PostgreSQL 17 service container，依次执行 `db:validate`、`db:generate` 和 `check:full`；CI 测试数据库与正式运行数据库完全隔离。当前普通测试为 5 个文件、18 项测试，真实数据库测试为 DB-01 至 DB-04 共 4 项测试。
+
+`GET /api/health` 的 Vitest 测试验证 200 JSON 响应、固定的服务标识、连接串字段不出现在响应中，并验证处理请求时不会请求 Prisma Client。
+
 数据库基础集成测试通过 `npm run test:db` 在真实 PostgreSQL 17 上运行，并仅从 `TEST_DATABASE_URL` 读取连接信息；测试代码不得回退读取 `DATABASE_URL`。测试 Client 必须独立于正式 Client，并通过 Prisma datasource 覆盖连接。DB-01 至 DB-04 必须使用固定、专用测试 Schema 和测试表，以参数绑定测试行标识验证 PostgreSQL 主版本、Prisma 事务提交、异常回滚及 Schema、表和测试行清理；所有异常路径均在 `finally` 清理，且不得使用 Unsafe Raw SQL 或操作业务表。连接信息不得写入日志或已跟踪文件。
