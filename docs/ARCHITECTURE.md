@@ -39,3 +39,7 @@ V2 数据库基础使用 PostgreSQL 17 与 Prisma 6.19.3。正式 Prisma schema 
 `Time` 明确区分业务日历日期（BusinessDate）、精确时间点（UTC Instant）和有效区间；有效区间遵循 `[from, to)`。企业业务时区固定为 `Asia/Shanghai`，Use Case 通过 `Clock` 获取当前时间，不能以运行环境本地时区为业务依据。
 
 `RequestContext` 显式传递 `requestId`、`receivedAt`、`businessTimeZone` 和联合类型 `actor`。它不保存权限快照、密码、Token 或 Cookie；未来 Transport Adapter、Use Case 和审计可共享同一个 Context。errors、time 和 request-context 均不依赖 Next.js Transport API，且 request-context 仅通过 time 的公开入口依赖 time。
+
+## CI 与部署运行边界
+
+GitHub Actions 是当前仓库的 CI 基线，负责代码质量和真实 PostgreSQL 测试；Vercel 是当前 Next.js Preview 部署平台。部署平台不是业务架构的一部分，后续可以替换。`GET /api/health` 使用 Node.js runtime，仅提供无数据库依赖的 liveness 信号，不是 readiness 或业务状态检查。

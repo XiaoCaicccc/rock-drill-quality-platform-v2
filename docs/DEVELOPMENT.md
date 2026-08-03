@@ -22,3 +22,9 @@ Prisma schema 的正式数据源仅使用 `DATABASE_URL`。`TEST_DATABASE_URL` �
 - 业务代码不得直接读取系统本地时区；未来 Use Case 不得散落 `new Date()` 或 `Date.now()`，应依赖 Clock。
 - Error code 的变更属于公共接口契约变更。
 - 平台模块对外只能通过各自 `index.ts` 导出。
+
+## 本地验证与部署边界
+
+本地完整验证使用 `npm.cmd run db:validate`、`npm.cmd run db:generate` 和 `npm.cmd run check:full`；真实数据库测试仍只通过开发者本地 `.env` 中的 `TEST_DATABASE_URL` 连接。GitHub Actions 使用其隔离的 PostgreSQL 17 service container 运行同一验证链，Vercel 只负责当前 Next.js Preview 部署，两者职责分离。
+
+`GET /api/health` 是 Node.js 进程存活检查，不访问数据库、不创建 Prisma Client，也不代表数据库或业务服务已就绪。不得提交 `.env` 或本地连接信息。
