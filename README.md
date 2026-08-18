@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-V2 实施路线已冻结；当前活动计划为 Slice 1A：组织层级与第一份业务 Migration。Slice 0 已全部完成：CI、Node.js liveness 健康检查 `GET /api/health` 和 Vercel Preview 部署基线均已建立。V2 数据库基础采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离；本 Slice 正在建立 Organization 与 OrgUnit，未实现认证、权限或 Session。
+V2 实施路线已冻结；Slice 1A（组织层级与第一份业务 Migration）已完成。Slice 0 已全部完成：CI、Node.js liveness 健康检查 `GET /api/health` 和 Vercel Preview 部署基线均已建立。V2 数据库基础采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离；下一计划 Slice 为 Slice 1B。
 
 ## 权威入口
 
