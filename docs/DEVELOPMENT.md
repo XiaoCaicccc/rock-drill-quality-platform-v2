@@ -6,6 +6,8 @@ Git worktree 只用于真正互不依赖、不会修改相同 Schema、公共接
 
 Migration 只能前进，已应用 Migration 不得修改。正常业务操作不得依赖手工 SQL；Seed 仅用于开发和测试；禁止生产 Setup API。
 
+第一份及后续 Prisma Migration 应在开发阶段生成后审计 SQL；测试数据库只能从 `TEST_DATABASE_URL` 通过 `npm run db:migrate:test` 与 `migrate deploy` 部署。正式运行仅允许 `migrate deploy`；禁止对共享或正式数据库使用 `db push`、`migrate reset` 或 `migrate dev`。`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格隔离，`.env` 与任何连接信息不得提交。
+
 Prisma schema 的正式数据源仅使用 `DATABASE_URL`。`TEST_DATABASE_URL` 仅供真实集成测试 Client 使用，两个变量不得回退或互用。开发环境使用 `globalThis` 复用正式 Prisma Client；测试 Client 不进入正式运行单例。开发创建 Migration 使用 `npm run db:migrate:dev`，生产只运行 `npm run db:migrate:deploy`；不得将 `db push` 作为正式迁移路径。
 
 业务规则变化必须先获得批准、更新相关文档和决策，再修改代码。所有变更仍受根 `AGENTS.md` 约束。

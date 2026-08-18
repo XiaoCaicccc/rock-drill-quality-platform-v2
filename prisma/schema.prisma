@@ -6,3 +6,41 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum OrganizationStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Organization {
+  id        String             @id @default(uuid()) @db.Uuid
+  code      String             @unique(map: "organization_code_key")
+  name      String
+  status    OrganizationStatus @default(ACTIVE)
+  createdAt DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime           @updatedAt @db.Timestamptz(6)
+  orgUnits  OrgUnit[]
+
+  @@map("organization")
+}
+
+model OrgUnit {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String             @db.Uuid
+  parentId       String?            @db.Uuid
+  code           String
+  name           String
+  status         OrganizationStatus @default(ACTIVE)
+  sortOrder      Int                @default(0)
+  createdAt      DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime           @updatedAt @db.Timestamptz(6)
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  parent         OrgUnit?           @relation("OrgUnitHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children       OrgUnit[]          @relation("OrgUnitHierarchy")
+
+  @@unique([organizationId, code], map: "org_unit_organization_id_code_key")
+  @@index([organizationId], map: "org_unit_organization_id_idx")
+  @@index([parentId], map: "org_unit_parent_id_idx")
+  @@index([status], map: "org_unit_status_idx")
+  @@map("org_unit")
+}
