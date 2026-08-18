@@ -50,3 +50,12 @@
 
 - 后续 Codex 提示词必须引用对应 Slice；一个任务只能交付一个清晰目标，且不允许提前进入后续 Slice。
 - 旧粗粒度路线仅保留为 Historical / superseded 背景，不再驱动开发；不新增 `ROADMAP.md`，避免文档职责重复。
+
+## D-026 — Organization hierarchy concurrency control
+
+状态：已确认（Accepted）
+日期：2026-08-03
+
+同一 Organization 上的 `createOrgUnit`、`moveOrgUnit`、`setOrgUnitStatus` 和 `setOrganizationStatus` 均在交互式 Prisma 事务内，按 Organization UUID 获取同一个 PostgreSQL transaction-scoped advisory lock。锁调用使用参数化 tagged SQL，且只保留在 organization 基础设施内部。
+
+Organization 状态变化必须与 hierarchy writers 串行化：writer 在取得锁后重新读取 Organization，避免其在停用前读取到的 stale `ACTIVE` 状态被用于后续层级写入。同一 Organization 的层级规则判断和写入因此串行化，不同 Organization 保持并发，公开契约不泄漏 Prisma 或 raw SQL。`renameOrgUnit` 不属于 hierarchy/status writer，不获取该锁。

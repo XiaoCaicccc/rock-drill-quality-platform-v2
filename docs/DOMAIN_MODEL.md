@@ -1,6 +1,13 @@
 # 领域模型原则
 
-本阶段仅冻结领域原则，不设计数据库表。
+本阶段冻结领域原则；Slice 1A 已建立 Organization 与 OrgUnit。
+
+## 组织层级
+
+- Organization 与 OrgUnit 以 UUID 作为不可变内部 ID，业务 code 可变且不得作为跨模块外键。
+- OrgUnit 使用 `parentId` adjacency list；数据库限制每 Organization 最多一个根，原子创建用例保证一个根。
+- 状态为 ACTIVE / INACTIVE；inactive parent 不得接收或重新激活 child，active descendant 阻止 ancestor 停用。
+- 根节点不得移动，禁止 self-parent、cross-organization parent 与 hierarchy cycle；Organization 停用后禁止创建或移动 OrgUnit。
 
 ## 身份与外部标识
 

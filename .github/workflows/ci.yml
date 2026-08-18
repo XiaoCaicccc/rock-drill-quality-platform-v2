@@ -53,5 +53,7 @@ jobs:
         run: npm run db:validate
       - name: Generate Prisma client
         run: npm run db:generate
+      - name: Deploy migrations to the isolated test database
+        run: npm run db:migrate:test
       - name: Run full verification
         run: npm run check:full
