@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-V2 实施路线已冻结；Slice 1A（组织层级与第一份业务 Migration）已完成。Slice 0 已全部完成：CI、Node.js liveness 健康检查 `GET /api/health` 和 Vercel Preview 部署基线均已建立。V2 数据库基础采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离；下一计划 Slice 为 Slice 1B。
+V2 实施路线已冻结；Slice 1B（Account / Authentication / DB-backed Revocable Session foundation）已完成并通过本地、真实 PostgreSQL、独立审阅与 PR CI 验证。Slice 0 与 Slice 1A 也已完成；数据库基础采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离。当前没有活动实施计划，Slice 1C / 1D 未激活。
 
 ## 权威入口
 

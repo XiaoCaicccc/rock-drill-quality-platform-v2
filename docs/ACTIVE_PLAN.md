@@ -1,51 +1,17 @@
 # ACTIVE PLAN
 
-## Status: ACTIVE — Slice 1B
+## Status: NO ACTIVE IMPLEMENTATION PLAN
 
-### Objective
+Slice 1B — Account / Authentication / DB-backed Revocable Session foundation — is the previous completed plan. Slice 1C / 1D are not active and require a new, explicit authorization before any implementation starts.
 
-Deliver the Account / Authentication / DB-backed Revocable Session foundation for the approved Slice 1B task on branch `feat/slice-1b-identity-session-foundation`.
+## Slice 1B final evidence
 
-The slice answers **who are you**:
-
-`Account → Password Credential → Login → DB-backed Session → Cookie → Session Validation → AuthenticatedActor → RequestContext`.
-
-### In scope
-
-- `Account` with one Organization and one same-Organization primary OrgUnit, globally unique normalized username, and `ACTIVE` / `INACTIVE` / `LOCKED` status.
-- Argon2id password hashing behind an infrastructure `PasswordHasher` abstraction, the 15–128 Unicode code-point policy, and safe public Account DTOs.
-- DB-backed opaque sessions with SHA-256 token hashes only, seven-day absolute expiry, revocation, dynamic Organization / OrgUnit validity, and a maximum of three active sessions per Account.
-- Transaction-serialized login and Account status changes, including permanent session revocation for Account deactivation/locking.
-- Application capabilities for account creation, status changes, authentication, session validation/listing/revocation/logout, and one-time initial bootstrap.
-- Node.js runtime transport routes for login, logout, current session, own active sessions, and own-session revocation.
-- Mapping a validated session into the existing `AuthenticatedActor` / `RequestContext` contract.
-- `bootstrap-admin` as a first-login-identity CLI; Organization and OrgUnit must already exist and password input must be masked stdin.
-- Forward-only Prisma migration, real PostgreSQL 17 invariant tests, API contract tests, regression verification, and closure updates to the existing authoritative documents.
-
-### Explicitly out of scope
-
-Roles, permissions, Data Scope, RBAC / ABAC, admin authorization, Audit, login or user-management UI, MFA, OAuth, SSO, signup/invitations, password reset/change, automatic lockout, full rate limiting, JWT / refresh tokens / sliding expiry, QR auth, API keys, device/IP/geo binding, background cleanup, and Slice 1C / 1D work.
-
-### Implementation boundaries
-
-- Identity / Session ownership is `src/platform/identity-session/`; consumers use only its `index.ts`.
-- Identity / Session must not import Organization internals or change Slice 1A hierarchy and D-026 locking semantics.
-- Existing migrations remain untouched; the new migration is forward-only.
-- Runtime uses `DATABASE_URL`; real integration tests use only `TEST_DATABASE_URL`.
-- No raw password, raw session token, token hash, or password hash may appear in public DTOs, errors, logs, tests, evidence, or tracked files.
-
-### Verification target
-
-`npm run db:validate`, `npm run db:generate`, `npm run check:full`, migration deployment, account/session/API tests, and deterministic real PostgreSQL evidence for three-session concurrency, login-disable races, status revocation, and bootstrap races.
-
-## Previous completed plan
-
-Slice 1A — organization hierarchy and first business migration — is complete. Its final evidence remains recorded below.
-
-## Slice 1A final evidence
-
-- Organization / OrgUnit foundation and the first business Prisma Migration were implemented.
-- PostgreSQL constraints and the transaction-scoped organization advisory lock were verified.
-- Local verification passed: lint, typecheck, 8 unit-test files / 31 tests, production build, and `db:migrate:test`.
-- Real PostgreSQL verification passed: DB-01～DB-04 (4/4) and ORG-DB-01～ORG-DB-13 (13/13), for 2 database test files / 17 tests.
-- PR #5 passed all GitHub Actions checks and its Vercel Preview is Ready.
+- Account, Argon2id password credential, opaque DB-backed Session, seven-day absolute expiry, revocation, three-session limit, authentication routes, own-session operations, and one-time bootstrap were implemented within the approved Slice 1B boundary.
+- `bootstrap-admin` delegates to the single identity application capability; its Windows wrapper, main-module detection, generated entry, safe failure output, and real database adapter behavior are covered.
+- A validated Session now establishes `AuthenticatedActor` on the same logical `RequestContext`, preserving `requestId` and `receivedAt`.
+- PostgreSQL acceptance covers normalized username uniqueness, same-Organization composite FK, inactive Organization / primary OrgUnit rejection, dynamic scope invalidation, unified public authentication failures, logout persistence, exact expiry, own-session protection, and bootstrap behavior.
+- Deterministic concurrency evidence uses formal PostgreSQL lock boundaries and `pg_blocking_pids` chains for two concurrent logins, login versus `LOCKED` / `INACTIVE`, and concurrent initial bootstrap; no sleep or Promise settlement order is used as Slice 1B concurrency proof.
+- FINAL_VERIFY passed: lint, typecheck, production build, 14 ordinary test files / 48 tests, migration deployment, 3 PostgreSQL test files / 26 tests, `db:validate`, `db:generate`, and `git diff --check`.
+- Independent review passed with 0 BLOCKER and 0 MAJOR findings. PR #6 initial GitHub Actions `verify` and Vercel checks passed on implementation commit `c4960b2`.
+- One existing Slice 1A `ORG-DB-13` transaction disappeared during an earlier FINAL_VERIFY attempt; its targeted infrastructure retry and the subsequent complete `check:full` rerun passed without production-code changes.
+- Known non-blocking finding: masked CLI input handles DEL as backspace; Windows `\u0008` and supplementary Unicode correction remain a minor usability edge case.
