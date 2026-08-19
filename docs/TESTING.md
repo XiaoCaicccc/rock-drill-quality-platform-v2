@@ -10,7 +10,7 @@
 
 `npm run check` 必须包含 lint、typecheck、test 和 build。
 
-GitHub Actions 是针对 `master` 的 pull request 和推送到 `master` 的自动质量门，也可手动触发。CI 使用隔离的 PostgreSQL 17 service container，依次执行 `db:validate`、`db:generate` 和 `check:full`；CI 测试数据库与正式运行数据库完全隔离。当前普通测试为 16 个文件、79 项测试，真实数据库测试为 4 个文件、36 项测试。Slice 1C 实现提交 `c97747c` 的 Draft PR #7 首轮 GitHub Actions CI 已通过；closure commit 仍须通过最终 CI 后才可进入 `READY_TO_MERGE`。
+GitHub Actions 是针对 `master` 的 pull request 和推送到 `master` 的自动质量门，也可手动触发。CI 使用隔离的 PostgreSQL 17 service container，依次执行 `db:validate`、`db:generate` 和 `check:full`；CI 测试数据库与正式运行数据库完全隔离。当前普通测试为 16 个文件、79 项测试，真实数据库测试为 4 个文件、36 项测试。Slice 1C 的 implementation CI 与 closure CI 均已通过，PR #7 已合并进入 `master`。
 
 `GET /api/health` 的 Vitest 测试验证 200 JSON 响应、固定的服务标识、连接串字段不出现在响应中，并验证处理请求时不会请求 Prisma Client。
 
