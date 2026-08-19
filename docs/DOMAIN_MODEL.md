@@ -15,6 +15,14 @@
 - `ExternalIdentifier` 用于未来关联供应商条码、原始流水号、旧系统编号和第三方系统 ID。外部标识只能解析到内部 ID，不能成为模块间主关联。
 - 二维码须区分不可变内部 ID、业务编号、外部标识和可撤销二维码访问 Token。二维码只保存对象引用，不复制业务数据。
 
+### Slice 1B Account / Session
+
+- 正式身份实体为 `Account`，不创建第二套 `User` 身份对象。Account 必须属于一个 Organization，并有一个属于同一 Organization 的 primary OrgUnit。
+- Account username 输入先 trim、再 lowercase；`normalizedUsername` globally unique。状态为 `ACTIVE`、`INACTIVE`、`LOCKED`；Slice 1B 不实现自动失败次数锁定。
+- 密码使用 Argon2id（memory 19456 KiB、passes 2、parallelism 1、16-byte salt、32-byte tag），且仅通过 infrastructure `PasswordHasher` 能力使用。密码和 passwordHash 不属于公共 DTO。
+- Session 使用 UUID、Account 外键、唯一 tokenHash、createdAt / expiresAt / revokedAt 与有界 user-agent。原始 token 为 32 个密码学安全随机字节的 base64url 表示，只在创建响应中短暂使用；数据库只保存 SHA-256 tokenHash。
+- Session 为七天 absolute expiration、无 sliding expiration；每个 Account 最多三条 active Session。Account 停用或锁定必须原子地永久撤销现有 Session；重新激活不复活旧 Session。Organization 或 primary OrgUnit 停用在 validation 时动态使 Session 无效。
+
 ## 生命周期与追溯
 
 - `PartMaster` 与 `PartRevision` 分离；已发布版本不得覆盖修改。
