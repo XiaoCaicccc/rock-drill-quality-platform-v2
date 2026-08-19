@@ -67,6 +67,17 @@ describe("Organization PostgreSQL integration", () => {
   it("ORG-DB-08 moveOrgUnit rejects a hierarchy cycle", async () => { const created = await organization(); const a = await child(created, "A"); const b = await child(created, "B", a.id); await expect(service.moveOrgUnit({ orgUnitId: a.id, newParentId: b.id })).rejects.toMatchObject(error("HIERARCHY_CYCLE")); });
   it("ORG-DB-09 inactive parents reject new and reactivated children", async () => { const created = await organization(); const parent = await child(created, "P"); const existing = await child(created, "C", parent.id); await service.setOrgUnitStatus({ orgUnitId: existing.id, status: "INACTIVE" }); await service.setOrgUnitStatus({ orgUnitId: parent.id, status: "INACTIVE" }); await expect(child(created, "NEW", parent.id)).rejects.toMatchObject(error("INACTIVE_PARENT")); await expect(service.setOrgUnitStatus({ orgUnitId: existing.id, status: "ACTIVE" })).rejects.toMatchObject(error("INACTIVE_PARENT")); });
   it("ORG-DB-10 active descendants prevent ancestor deactivation", async () => { const created = await organization(); await child(created, "ACTIVE"); await expect(service.setOrgUnitStatus({ orgUnitId: created.rootOrgUnit.id, status: "INACTIVE" })).rejects.toMatchObject(error("ACTIVE_DESCENDANTS_PREVENT_DEACTIVATION")); });
+  it("Organization subtree capability handles structural and Organization boundaries safely", async () => {
+    const first = await organization(); const second = await organization();
+    const branch = await child(first, "BRANCH"); const direct = await child(first, "DIRECT", branch.id); const deep = await child(first, "DEEP", direct.id); const sibling = await child(first, "SIBLING");
+    await expect(service.isOrgUnitInSubtree({ organizationId: first.organization.id, ancestorOrgUnitId: branch.id, candidateOrgUnitId: branch.id })).resolves.toBe(true);
+    await expect(service.isOrgUnitInSubtree({ organizationId: first.organization.id, ancestorOrgUnitId: branch.id, candidateOrgUnitId: direct.id })).resolves.toBe(true);
+    await expect(service.isOrgUnitInSubtree({ organizationId: first.organization.id, ancestorOrgUnitId: branch.id, candidateOrgUnitId: deep.id })).resolves.toBe(true);
+    await expect(service.isOrgUnitInSubtree({ organizationId: first.organization.id, ancestorOrgUnitId: branch.id, candidateOrgUnitId: sibling.id })).resolves.toBe(false);
+    await expect(service.isOrgUnitInSubtree({ organizationId: first.organization.id, ancestorOrgUnitId: branch.id, candidateOrgUnitId: second.rootOrgUnit.id })).resolves.toBe(false);
+    await expect(service.isOrgUnitInSubtree({ organizationId: second.organization.id, ancestorOrgUnitId: branch.id, candidateOrgUnitId: deep.id })).resolves.toBe(false);
+    await expect(service.isOrgUnitInSubtree({ organizationId: first.organization.id, ancestorOrgUnitId: branch.id, candidateOrgUnitId: randomUUID() })).resolves.toBe(false);
+  });
   it("ORG-DB-11 rejects a hierarchy writer that waits behind a completed deactivation", async () => {
     const created = await organization(); const gateClient = createTestPrismaClient(); const statusClient = createTestPrismaClient(); const hierarchyClient = createTestPrismaClient(); const gateHeld = deferred(); const releaseGate = deferred(); const events: string[] = [];
     let gateHolder: Promise<unknown> | undefined;

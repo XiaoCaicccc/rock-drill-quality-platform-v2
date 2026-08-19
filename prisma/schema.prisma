@@ -39,6 +39,7 @@ model OrgUnit {
   parent         OrgUnit?           @relation("OrgUnitHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
   children       OrgUnit[]          @relation("OrgUnitHierarchy")
   primaryAccounts Account[]         @relation("AccountPrimaryOrgUnit")
+  scopedRoleAssignments AccountRoleAssignment[] @relation("RoleAssignmentScopeOrgUnit")
 
   @@unique([organizationId, code], map: "org_unit_organization_id_code_key")
   @@unique([id, organizationId], map: "org_unit_id_organization_id_key")
@@ -52,6 +53,14 @@ enum AccountStatus {
   ACTIVE
   INACTIVE
   LOCKED
+}
+
+enum RoleCode {
+  ADMIN
+  QUALITY_MANAGER
+  INSPECTOR
+  ENGINEER
+  VIEWER
 }
 
 model Account {
@@ -68,10 +77,29 @@ model Account {
   organization      Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   primaryOrgUnit    OrgUnit       @relation("AccountPrimaryOrgUnit", fields: [primaryOrgUnitId, organizationId], references: [id, organizationId], onDelete: Restrict)
   sessions          Session[]
+  roleAssignments   AccountRoleAssignment[] @relation("AccountRoleAssignments")
 
+  @@unique([id, organizationId], map: "account_id_organization_id_key")
   @@index([organizationId], map: "account_organization_id_idx")
   @@index([status], map: "account_status_idx")
   @@map("account")
+}
+
+model AccountRoleAssignment {
+  id              String   @id @default(uuid()) @db.Uuid
+  accountId       String   @db.Uuid
+  organizationId  String   @db.Uuid
+  role             RoleCode
+  scopeOrgUnitId  String   @db.Uuid
+  createdAt        DateTime @default(now()) @db.Timestamptz(6)
+  account          Account  @relation("AccountRoleAssignments", fields: [accountId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  scopeOrgUnit     OrgUnit  @relation("RoleAssignmentScopeOrgUnit", fields: [scopeOrgUnitId, organizationId], references: [id, organizationId], onDelete: Restrict)
+
+  @@unique([accountId, role, scopeOrgUnitId], map: "account_role_assignment_exact_key")
+  @@index([accountId, organizationId], map: "account_role_assignment_account_organization_idx")
+  @@index([scopeOrgUnitId, organizationId], map: "account_role_assignment_scope_organization_idx")
+  @@index([organizationId, role], map: "account_role_assignment_organization_role_idx")
+  @@map("account_role_assignment")
 }
 
 model Session {

@@ -1,17 +1,46 @@
 # ACTIVE PLAN
 
-## Status: NO ACTIVE IMPLEMENTATION PLAN
+## Status: CLOSURE — Slice 1C
 
-Slice 1B — Account / Authentication / DB-backed Revocable Session foundation — is the previous completed plan. Slice 1C / 1D are not active and require a new, explicit authorization before any implementation starts.
+Slice 1C — Role / Permission / Data Scope Authorization Foundation has completed implementation, local verification, independent review, human architecture/security review, and initial PR CI on `feat/slice-1c-authorization-foundation`. Draft PR #7 is awaiting the closure commit's final CI. A passing final CI may move the loop only to `READY_TO_MERGE`; merge and Slice 1D remain separately human-gated.
 
-## Slice 1B final evidence
+## Objective
 
-- Account, Argon2id password credential, opaque DB-backed Session, seven-day absolute expiry, revocation, three-session limit, authentication routes, own-session operations, and one-time bootstrap were implemented within the approved Slice 1B boundary.
-- `bootstrap-admin` delegates to the single identity application capability; its Windows wrapper, main-module detection, generated entry, safe failure output, and real database adapter behavior are covered.
-- A validated Session now establishes `AuthenticatedActor` on the same logical `RequestContext`, preserving `requestId` and `receivedAt`.
-- PostgreSQL acceptance covers normalized username uniqueness, same-Organization composite FK, inactive Organization / primary OrgUnit rejection, dynamic scope invalidation, unified public authentication failures, logout persistence, exact expiry, own-session protection, and bootstrap behavior.
-- Deterministic concurrency evidence uses formal PostgreSQL lock boundaries and `pg_blocking_pids` chains for two concurrent logins, login versus `LOCKED` / `INACTIVE`, and concurrent initial bootstrap; no sleep or Promise settlement order is used as Slice 1B concurrency proof.
-- FINAL_VERIFY passed: lint, typecheck, production build, 14 ordinary test files / 48 tests, migration deployment, 3 PostgreSQL test files / 26 tests, `db:validate`, `db:generate`, and `git diff --check`.
-- Independent review passed with 0 BLOCKER and 0 MAJOR findings. PR #6 initial GitHub Actions `verify` and Vercel checks passed on implementation commit `c4960b2`.
-- One existing Slice 1A `ORG-DB-13` transaction disappeared during an earlier FINAL_VERIFY attempt; its targeted infrastructure retry and the subsequent complete `check:full` rerun passed without production-code changes.
-- Known non-blocking finding: masked CLI input handles DEL as backspace; Windows `\u0008` and supplementary Unicode correction remain a minor usability edge case.
+Establish the server-side Authorization platform that answers what an authenticated Account may do and which data inside its own Organization it may touch. Authorization evaluates the current committed role assignments, code-declared permission policy, Data Scope, target facts, and creator/reviewer separation.
+
+## In scope
+
+- Five fixed roles: `ADMIN`, `QUALITY_MANAGER`, `INSPECTOR`, `ENGINEER`, `VIEWER`.
+- Persistent `AccountRoleAssignment` with a required OrgUnit scope anchor, same-Organization composite foreign keys, exact-assignment uniqueness, and a forward-only Migration.
+- Permission codes using `module.business_action`; validated code-declared `PermissionDefinition` values with additive role grants.
+- Six Data Scopes: `ALL`, `ORG_SUBTREE`, `ORG_UNIT`, `ASSIGNED`, `OWN_CREATED`, `NONE`.
+- Same-Organization boundary, fail-closed target facts, special same-Organization `ADMIN` grant, and `CREATOR_REVIEW` separation.
+- Live role-assignment lookup without Session, RequestContext, JWT, or cache snapshots.
+- Public `evaluateAuthorization()` and `requireAuthorization()` capabilities, plus internal application capabilities to assign, revoke, and list role assignments.
+- A minimal read-only Organization subtree capability exposed only through the Organization public entry point, without changing D-026 locking.
+- Real PostgreSQL acceptance for schema, composite FKs, uniqueness, allowed multiplicity, and concurrent exact assignment.
+- Unit/integration behavior coverage and complete regression verification.
+
+## Out of scope
+
+- Custom roles or permissions, role hierarchy or priority, explicit deny policy, permission editor, or a complete business permission matrix.
+- Role-management HTTP APIs or UI, user-management UI, or login UI.
+- Audit, emergency admin override, assignment history, or Slice 1D bootstrap/management closure.
+- Part, Revision, Inspection, Report, business workflow/state-machine implementation, or other future Slice work.
+- Authorization cache, JWT permission claims, multi-tenant authorization, API keys, or external identity providers.
+
+## Acceptance and delivery
+
+- All five roles, all six Data Scopes, multi-role and multi-assignment union, Organization boundary, Admin constraints, creator/reviewer separation, missing-fact fail-closed behavior, and live add/revoke behavior are proven by behavior tests.
+- `AUTHZ-DB-01` through `AUTHZ-DB-07` pass against real PostgreSQL; Slice 0, 1A, and 1B regressions remain green.
+- `npm run db:validate`, `npm run db:generate`, `npm run check:full`, and `git diff --check` pass.
+- Independent review reports zero unresolved BLOCKER and zero unresolved MAJOR findings.
+- The implementation and closure commits pass GitHub Actions. The loop stops at `READY_TO_MERGE`; merge and Slice 1D require separate human action.
+
+## Closure evidence
+
+- Implementation commit: `c97747ce75f71854091d8b61a57158c913577caf`.
+- Local final verification: `npm run check:full`, `npm run db:validate`, `npm run db:generate`, and `git diff --check` passed; 16 ordinary test files / 79 tests and 4 PostgreSQL test files / 36 tests passed.
+- Independent review and human architecture/security review: 0 unresolved BLOCKER, 0 unresolved MAJOR.
+- Draft PR: #7, targeting `master`; initial GitHub Actions CI run #13 passed on the implementation commit.
+- Closure does not activate Slice 1D and does not authorize automatic merge.
