@@ -1,8 +1,8 @@
 # ACTIVE PLAN
 
-## Status: ACTIVE — Slice 1C
+## Status: CLOSURE — Slice 1C
 
-Slice 1C — Role / Permission / Data Scope Authorization Foundation is approved for implementation on `feat/slice-1c-authorization-foundation`.
+Slice 1C — Role / Permission / Data Scope Authorization Foundation has completed implementation, local verification, independent review, human architecture/security review, and initial PR CI on `feat/slice-1c-authorization-foundation`. Draft PR #7 is awaiting the closure commit's final CI. A passing final CI may move the loop only to `READY_TO_MERGE`; merge and Slice 1D remain separately human-gated.
 
 ## Objective
 
@@ -36,3 +36,11 @@ Establish the server-side Authorization platform that answers what an authentica
 - `npm run db:validate`, `npm run db:generate`, `npm run check:full`, and `git diff --check` pass.
 - Independent review reports zero unresolved BLOCKER and zero unresolved MAJOR findings.
 - The implementation and closure commits pass GitHub Actions. The loop stops at `READY_TO_MERGE`; merge and Slice 1D require separate human action.
+
+## Closure evidence
+
+- Implementation commit: `c97747ce75f71854091d8b61a57158c913577caf`.
+- Local final verification: `npm run check:full`, `npm run db:validate`, `npm run db:generate`, and `git diff --check` passed; 16 ordinary test files / 79 tests and 4 PostgreSQL test files / 36 tests passed.
+- Independent review and human architecture/security review: 0 unresolved BLOCKER, 0 unresolved MAJOR.
+- Draft PR: #7, targeting `master`; initial GitHub Actions CI run #13 passed on the implementation commit.
+- Closure does not activate Slice 1D and does not authorize automatic merge.
