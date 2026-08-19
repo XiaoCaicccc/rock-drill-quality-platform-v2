@@ -1,10 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { anonymousActor, createAuthenticatedActor, createRequestContext, createRequestId } from "./index";
+import { anonymousActor, createAuthenticatedActor, createRequestContext, createRequestId, withAuthenticatedActor } from "./index";
 
 const fixedClock = { now: (): Date => new Date("2026-07-30T01:23:45.678Z") };
 const fixedRequestId = (): ReturnType<typeof createRequestId> => createRequestId("request-fixed");
 
 describe("RequestContext", () => {
+  it("preserves request metadata when establishing an authenticated actor", () => {
+    const anonymous = createRequestContext({ clock: fixedClock, requestIdFactory: fixedRequestId });
+    const authenticated = withAuthenticatedActor(anonymous, { kind: "user", userId: "account-1", sessionId: "session-1", organizationId: "org-1", organizationUnitId: "unit-1" });
+    expect(authenticated.requestId).toBe(anonymous.requestId);
+    expect(authenticated.receivedAt).toBe(anonymous.receivedAt);
+    expect(authenticated.actor).toMatchObject({ kind: "user", userId: "account-1", sessionId: "session-1" });
+  });
+
   it("creates a frozen anonymous context by default", () => {
     const context = createRequestContext({ clock: fixedClock, requestIdFactory: fixedRequestId });
     expect(context).toEqual({ requestId: "request-fixed", receivedAt: "2026-07-30T01:23:45.678Z", businessTimeZone: "Asia/Shanghai", actor: anonymousActor });

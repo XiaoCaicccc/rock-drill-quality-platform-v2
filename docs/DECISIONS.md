@@ -59,3 +59,14 @@
 同一 Organization 上的 `createOrgUnit`、`moveOrgUnit`、`setOrgUnitStatus` 和 `setOrganizationStatus` 均在交互式 Prisma 事务内，按 Organization UUID 获取同一个 PostgreSQL transaction-scoped advisory lock。锁调用使用参数化 tagged SQL，且只保留在 organization 基础设施内部。
 
 Organization 状态变化必须与 hierarchy writers 串行化：writer 在取得锁后重新读取 Organization，避免其在停用前读取到的 stale `ACTIVE` 状态被用于后续层级写入。同一 Organization 的层级规则判断和写入因此串行化，不同 Organization 保持并发，公开契约不泄漏 Prisma 或 raw SQL。`renameOrgUnit` 不属于 hierarchy/status writer，不获取该锁。
+
+## D-027 — Account authentication and revocable Session semantics
+
+状态：已确认（Accepted）
+日期：2026-08-19
+
+Slice 1B 使用单一 `Account` 身份实体，不同时建立 `User` 与 `Account`。Account 通过 required `organizationId` 与 `primaryOrgUnitId` 归属于同一 Organization，用户名以 trim + lowercase 得到 globally unique `normalizedUsername`，状态为 `ACTIVE`、`INACTIVE` 或 `LOCKED`。密码凭据使用 infrastructure 封装的 Argon2id，参数固定为 memory 19456 KiB、passes 2、parallelism 1、16-byte salt 与 32-byte tag。
+
+Session 是数据库实体，保存 UUID、Account 外键、唯一 SHA-256 `tokenHash`、创建/绝对过期/撤销时间和有界 user-agent；raw token 由 32 个密码学安全随机字节生成后仅返回给 Cookie，不持久化。Session 绝对有效期为七天，不启用 sliding expiration；每个 Account 最多三条 active Session，登录创建与 Account 状态变更共享 Account row serialization boundary。Account 从 ACTIVE 变为 INACTIVE 或 LOCKED 时，在同一事务中永久撤销其现有 Session；重新激活不复活旧 Session。Organization 或 primary OrgUnit 停用通过每次 Session validation 动态使身份失效，不反向批量修改 Session。
+
+Identity / Session 通过现有 RequestContext 的 `AuthenticatedActor` 表达身份；Authorization、角色、权限、Data Scope 与 Audit 保留给 Slice 1C / 1D。

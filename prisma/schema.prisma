@@ -20,6 +20,7 @@ model Organization {
   createdAt DateTime           @default(now()) @db.Timestamptz(6)
   updatedAt DateTime           @updatedAt @db.Timestamptz(6)
   orgUnits  OrgUnit[]
+  accounts  Account[]
 
   @@map("organization")
 }
@@ -37,10 +38,53 @@ model OrgUnit {
   organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   parent         OrgUnit?           @relation("OrgUnitHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
   children       OrgUnit[]          @relation("OrgUnitHierarchy")
+  primaryAccounts Account[]         @relation("AccountPrimaryOrgUnit")
 
   @@unique([organizationId, code], map: "org_unit_organization_id_code_key")
+  @@unique([id, organizationId], map: "org_unit_id_organization_id_key")
   @@index([organizationId], map: "org_unit_organization_id_idx")
   @@index([parentId], map: "org_unit_parent_id_idx")
   @@index([status], map: "org_unit_status_idx")
   @@map("org_unit")
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  LOCKED
+}
+
+model Account {
+  id                String        @id @default(uuid()) @db.Uuid
+  organizationId    String        @db.Uuid
+  primaryOrgUnitId  String        @db.Uuid
+  username          String        @db.VarChar(128)
+  normalizedUsername String       @unique(map: "account_normalized_username_key") @db.VarChar(128)
+  displayName       String        @db.VarChar(200)
+  passwordHash      String        @db.VarChar(512)
+  status            AccountStatus @default(ACTIVE)
+  createdAt         DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime      @updatedAt @db.Timestamptz(6)
+  organization      Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  primaryOrgUnit    OrgUnit       @relation("AccountPrimaryOrgUnit", fields: [primaryOrgUnitId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  sessions          Session[]
+
+  @@index([organizationId], map: "account_organization_id_idx")
+  @@index([status], map: "account_status_idx")
+  @@map("account")
+}
+
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  accountId  String   @db.Uuid
+  tokenHash  String   @unique(map: "session_token_hash_key") @db.VarChar(64)
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  expiresAt  DateTime @db.Timestamptz(6)
+  revokedAt  DateTime? @db.Timestamptz(6)
+  userAgent  String?  @db.VarChar(512)
+  account    Account  @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([accountId, expiresAt], map: "session_account_id_expires_at_idx")
+  @@index([accountId, revokedAt], map: "session_account_id_revoked_at_idx")
+  @@map("session")
 }

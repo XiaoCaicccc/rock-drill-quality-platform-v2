@@ -1,6 +1,6 @@
 # 当前状态
 
-Slice 1A：组织层级与第一份业务 Migration 已完成。已建立 Organization / OrgUnit foundation、第一份业务 Migration、transaction-scoped organization advisory lock 与 PostgreSQL 约束。本地验收通过：lint、typecheck、8 个普通测试文件 / 31 tests、production build、`db:migrate:test`、DB-01～DB-04（4/4）和 ORG-DB-01～ORG-DB-13（13/13）；数据库测试共 2 个文件 / 17 tests。PR #5 的 GitHub Actions 全部通过，Vercel Preview 为 Ready。下一项为 Slice 1B，需在新的独立 Codex task 中激活。
+Slice 1B：Account / Authentication / DB-backed Revocable Session foundation 已完成。已建立 Account、Argon2id password credential、opaque DB-backed Session、七天绝对有效期、撤销与三 Session 上限、认证 API、own-session 操作、单一 identity application bootstrap、可复用 authenticated RequestContext，以及正式 PostgreSQL 锁边界并发证据。FINAL_VERIFY 通过：lint、typecheck、14 个普通测试文件 / 48 tests、production build、`db:migrate:test`、DB-01～DB-04、ORG-DB-01～ORG-DB-13 与 Slice 1B acceptance/concurrency tests；数据库测试共 3 个文件 / 26 tests。独立审阅为 0 BLOCKER / 0 MAJOR；PR #6 的实现提交 GitHub Actions `verify` 与 Vercel 检查已通过。Slice 1C / 1D 未激活，不得在没有新授权时实施。
 
 Slice 0A 项目控制基线已完成；Slice 0B-1 至 Slice 0B-4 也已完成。
 
@@ -14,4 +14,4 @@ Slice 0B-3 已完成：数据库基础采用 PostgreSQL 17.10 与 Prisma 6.19.3�
 
 Slice 0B-4 已完成：GitHub Actions CI 位于 `.github/workflows/ci.yml`，在针对 `master` 的 pull request、推送到 `master` 及手动触发时运行。CI 使用 Node.js 24.18.0、npm 和隔离的 PostgreSQL 17 service container，已成功执行 `db:validate`、`db:generate` 与 `check:full`。`GET /api/health` 是无数据库依赖、无 Prisma Client 的 Node.js liveness endpoint；GitHub Actions verify 已通过，Vercel Preview 为 Ready。
 
-普通测试为 8 个文件、31/31 tests passed；真实 PostgreSQL 数据库测试为 2 个文件，DB-01 至 DB-04 与 ORG-DB-01 至 ORG-DB-13 共 17/17 tests passed。V2 第一阶段 Slice 0～8 路线已冻结，Slice 0A、0B-1、0B-2、0B-3、0B-4 与 Slice 1A 已完成。Organization 位于 `src/platform/organization`；`.env` 和本地连接信息未进入 Git。后续 Slice 1B 仅在新的独立任务获授权后开始。
+普通测试为 14 个文件、48/48 tests passed；真实 PostgreSQL 数据库测试为 3 个文件、26/26 tests passed。V2 第一阶段 Slice 0～8 路线已冻结，Slice 0A、0B-1、0B-2、0B-3、0B-4、Slice 1A 与 Slice 1B 已完成。Organization 位于 `src/platform/organization`，Identity / Session 位于 `src/platform/identity-session`；`.env` 和本地连接信息未进入 Git。当前没有活动实施计划。

@@ -10,6 +10,7 @@ export default defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    ".codex-runtime/**",
     "next-env.d.ts",
   ]),
 ]);

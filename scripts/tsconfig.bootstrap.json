@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "noEmit": false,
+    "noEmitOnError": true,
+    "rootDir": "../src",
+    "outDir": "../.codex-runtime/bootstrap-admin",
+    "isolatedModules": false
+  },
+  "include": ["../src/cli/bootstrap-admin.ts"]
+}
