@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-V2 实施路线已冻结；Slice 1B（Account / Authentication / DB-backed Revocable Session foundation）已完成。Slice 1C（Role / Permission / Data Scope Authorization Foundation）实现、真实 PostgreSQL 验收、独立审阅、人工架构与安全审阅以及实现提交 PR CI 均已通过；Draft PR #7 正在等待 closure commit 的最终 CI，之后仅可进入 `READY_TO_MERGE` 并等待人工合并。Slice 1D 未激活。数据库基础采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离。
+V2 实施路线已冻结；Slice 1A、Slice 1B 与 Slice 1C 均已 `CLOSED`，Role / Permission / Data Scope Authorization foundation 已完成。当前没有 active implementation；Slice 1D 是 next planned Slice，尚未激活。数据库基础继续采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离。
 
 ## 权威入口
 

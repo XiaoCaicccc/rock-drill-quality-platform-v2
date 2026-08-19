@@ -12,6 +12,13 @@ Prisma schema 的正式数据源仅使用 `DATABASE_URL`。`TEST_DATABASE_URL` �
 
 业务规则变化必须先获得批准、更新相关文档和决策，再修改代码。所有变更仍受根 `AGENTS.md` 约束。
 
+## Post-merge state reconciliation
+
+- `READY_TO_MERGE` 不是 Slice `CLOSED`。HUMAN merge 完成后，post-merge cleanup 必须核对 `master` 的真实 merge 状态。
+- 在 Slice 被宣布 `CLOSED` 前，`master` 上 tracked authoritative docs 必须与真实 merge 状态一致：至少 `CURRENT_STATE.md` 记录 completed / merged 状态；`ACTIVE_PLAN.md` 回到 `NO ACTIVE IMPLEMENTATION PLAN`，除非新的 Slice 已单独获得 `HUMAN_GATE_START`；根 `README.md` 的简要当前状态同步更新。
+- Runtime checkpoint `CLOSED` 不能替代 tracked authoritative docs 的同步。若 tracked docs 仍停留在 `CLOSURE` / `READY_TO_MERGE`，不得宣告完整 closure。
+- 下一 Slice 的 PREFLIGHT 必须把 post-merge state drift 作为 blocker / reconciliation item 处理，不得直接覆盖或据此激活下一 Slice。
+
 ## 工程基线
 
 - 使用 Node.js 24 与 npm；CI 和干净安装必须使用 `npm ci`。
