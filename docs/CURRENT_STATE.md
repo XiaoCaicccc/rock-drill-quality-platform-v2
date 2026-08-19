@@ -1,12 +1,12 @@
 # 当前状态
 
-Slice 1C — Role / Permission / Data Scope Authorization Foundation：`CLOSED / completed`。PR #7 已人工合并进入 `master`，merge commit 为 `25413578eec88d8a4d7c06febe997b49358b9cec`。
+Slice 1C — Role / Permission / Data Scope Authorization Foundation：`CLOSED / completed`。PR #7 已人工合并进入 `master`，merge commit 为 `25413578eec88d8a4d7c06febe997b49358b9cec`；verification baseline: PASS。
 
 已完成并验证的核心能力包括：five fixed Roles、persistent `AccountRoleAssignment`、code-declared Permission Policy、six Data Scopes、Organization boundary、creator/reviewer separation、live authorization lookup、Organization subtree public capability，以及 PostgreSQL authorization acceptance/concurrency。
 
 最终已验证基线：16 个 ordinary test files、79/79 ordinary tests PASS；4 个 PostgreSQL test files、36/36 PostgreSQL tests PASS；`db:validate` PASS、`db:generate` PASS、`check:full` PASS；implementation CI PASS、closure CI PASS；independent review 为 BLOCKER 0 / MAJOR 0，human architecture/security review 为 BLOCKER 0 / MAJOR 0。
 
-当前 active implementation：`NONE`。Slice 1D 是 `NEXT PLANNED`，但 `NOT ACTIVE / NOT AUTHORIZED`；必须另行获得新的 `HUMAN_GATE_START` 才可激活。
+当前 active implementation: `NONE`。Slice 1D 是 `NEXT PLANNED / NOT ACTIVE / NOT AUTHORIZED`；本次 pre-Slice governance compatibility repair 不激活任何业务实现。
 
 Slice 1B：Account / Authentication / DB-backed Revocable Session foundation 已完成。已建立 Account、Argon2id password credential、opaque DB-backed Session、七天绝对有效期、撤销与三 Session 上限、认证 API、own-session 操作、单一 identity application bootstrap、可复用 authenticated RequestContext，以及正式 PostgreSQL 锁边界并发证据。FINAL_VERIFY 通过：lint、typecheck、14 个普通测试文件 / 48 tests、production build、`db:migrate:test`、DB-01～DB-04、ORG-DB-01～ORG-DB-13 与 Slice 1B acceptance/concurrency tests；数据库测试共 3 个文件 / 26 tests。独立审阅为 0 BLOCKER / 0 MAJOR；PR #6 的实现提交 GitHub Actions `verify` 与 Vercel 检查已通过。Slice 1D 未激活，不得在没有新授权时实施。
 
