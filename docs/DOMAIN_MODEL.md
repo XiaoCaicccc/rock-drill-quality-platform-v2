@@ -23,6 +23,16 @@
 - Session 使用 UUID、Account 外键、唯一 tokenHash、createdAt / expiresAt / revokedAt 与有界 user-agent。原始 token 为 32 个密码学安全随机字节的 base64url 表示，只在创建响应中短暂使用；数据库只保存 SHA-256 tokenHash。
 - Session 为七天 absolute expiration、无 sliding expiration；每个 Account 最多三条 active Session。Account 停用或锁定必须原子地永久撤销现有 Session；重新激活不复活旧 Session。Organization 或 primary OrgUnit 停用在 validation 时动态使 Session 无效。
 
+### Slice 1C Role / Permission / Data Scope
+
+- Role 固定为 `ADMIN`、`QUALITY_MANAGER`、`INSPECTOR`、`ENGINEER`、`VIEWER`。一个 Account 可有多个 Role，同一 Role 可在多个 OrgUnit scope 上分配；授权采用 additive union，不存在 deny override、优先级或角色层级。
+- `AccountRoleAssignment` 是当前授权关系，包含 Account、Organization、固定 Role、required `scopeOrgUnitId` 与创建时间。Account、Assignment 与 scope OrgUnit 必须属于同一 Organization；完全相同的 Account + Role + scope OrgUnit 只能存在一条。
+- `Account.primaryOrgUnitId` 表达组织身份，`AccountRoleAssignment.scopeOrgUnitId` 表达授权 anchor；两者不得互相推断或自动同步。
+- Permission 是代码声明的稳定 `module.business_action` contract，不建设 Permission 主数据表或全业务矩阵。一个 Role 对一个 Permission 可有多个不同 Data Scope grant，但完全重复的 Role + Data Scope 无效。
+- Data Scope 固定为 `ALL`、`ORG_SUBTREE`、`ORG_UNIT`、`ASSIGNED`、`OWN_CREATED`、`NONE`。所有范围先受 actor 与 target 同 Organization 限制；所需 target fact 缺失必须 fail closed。
+- `ADMIN` 对任意有效 Permission 在本 Organization 内自动具有 `ALL`，但不能跨 Organization，也不能绕过 `CREATOR_REVIEW` 或未来业务状态机。
+- 每次授权都读取当前已提交 Role Assignment，不在 Session 或 RequestContext 中保存 Role、Permission 或 Data Scope 快照。撤销提交后新的授权检查立即失效；已完成授权判断的 in-flight Use Case 不被追溯取消。
+
 ## 生命周期与追溯
 
 - `PartMaster` 与 `PartRevision` 分离；已发布版本不得覆盖修改。

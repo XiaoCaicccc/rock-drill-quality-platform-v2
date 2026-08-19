@@ -2,7 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 
 import { assertOrganizationStatus, normalizeCode, normalizeName, normalizeSortOrder } from "../domain/organization";
 import { lockOrganizationHierarchy, toOrganizationDto, toOrgUnitDto, type OrganizationTransaction } from "../infrastructure/organization-prisma";
-import type { CreateOrganizationWithRootInput, CreateOrgUnitInput, MoveOrgUnitInput, OrganizationService, RenameOrgUnitInput, SetOrganizationStatusInput, SetOrgUnitStatusInput } from "./contracts";
+import type { CreateOrganizationWithRootInput, CreateOrgUnitInput, IsOrgUnitInSubtreeInput, MoveOrgUnitInput, OrganizationService, RenameOrgUnitInput, SetOrganizationStatusInput, SetOrgUnitStatusInput } from "./contracts";
 import { organizationError, type OrganizationErrorKind } from "./errors";
 
 function normalizeOrganizationInput(input: { code: string; name: string }): { code: string; name: string } {
@@ -51,6 +51,25 @@ async function requireOrgUnit(transaction: OrganizationTransaction, orgUnitId: s
 
 export function createOrganizationServiceForPrisma(prisma: PrismaClient): OrganizationService {
   return {
+    async isOrgUnitInSubtree(input: IsOrgUnitInSubtreeInput) {
+      const units = await prisma.orgUnit.findMany({
+        where: { organizationId: input.organizationId },
+        select: { id: true, parentId: true },
+      });
+      if (!units.some((unit) => unit.id === input.ancestorOrgUnitId) || !units.some((unit) => unit.id === input.candidateOrgUnitId)) return false;
+      if (input.ancestorOrgUnitId === input.candidateOrgUnitId) return true;
+
+      let currentId: string | null = input.candidateOrgUnitId;
+      const visited = new Set<string>();
+      while (currentId !== null && !visited.has(currentId)) {
+        if (currentId === input.ancestorOrgUnitId) return true;
+        visited.add(currentId);
+        const current = units.find((unit) => unit.id === currentId);
+        currentId = current?.parentId ?? null;
+      }
+      return false;
+    },
+
     async createOrganizationWithRoot(input: CreateOrganizationWithRootInput) {
       const organizationInput = normalizeOrganizationInput(input);
       const rootInput = normalizeOrgUnitInput(input.root) as { code: string; name: string; sortOrder: number };

@@ -70,3 +70,16 @@ Slice 1B 使用单一 `Account` 身份实体，不同时建立 `User` 与 `Accou
 Session 是数据库实体，保存 UUID、Account 外键、唯一 SHA-256 `tokenHash`、创建/绝对过期/撤销时间和有界 user-agent；raw token 由 32 个密码学安全随机字节生成后仅返回给 Cookie，不持久化。Session 绝对有效期为七天，不启用 sliding expiration；每个 Account 最多三条 active Session，登录创建与 Account 状态变更共享 Account row serialization boundary。Account 从 ACTIVE 变为 INACTIVE 或 LOCKED 时，在同一事务中永久撤销其现有 Session；重新激活不复活旧 Session。Organization 或 primary OrgUnit 停用通过每次 Session validation 动态使身份失效，不反向批量修改 Session。
 
 Identity / Session 通过现有 RequestContext 的 `AuthenticatedActor` 表达身份；Authorization、角色、权限、Data Scope 与 Audit 保留给 Slice 1C / 1D。
+
+## D-028 — Fixed roles, role assignments and policy-driven authorization
+
+状态：已确认（Accepted）
+日期：2026-08-19
+
+Slice 1C 固定五种 Role：`ADMIN`、`QUALITY_MANAGER`、`INSPECTOR`、`ENGINEER`、`VIEWER`。`AccountRoleAssignment` 持久化 Account、Organization、Role、required `scopeOrgUnitId` 与创建时间；Account、Assignment、scope OrgUnit 必须属于同一 Organization，完全相同的 Account + Role + scope OrgUnit 由数据库唯一约束禁止。`Account.primaryOrgUnitId` 仅表达组织身份，不能替代或自动改变授权 scope。
+
+Permission 使用代码声明的 `module.business_action` policy，不建立 Permission 主表、完整业务矩阵、custom Role/Permission、role hierarchy、priority 或 explicit DENY。多个 Role、Assignment 和 grant 采用 additive union。Data Scope 固定为 `ALL`、`ORG_SUBTREE`、`ORG_UNIT`、`ASSIGNED`、`OWN_CREATED`、`NONE`；所需 target fact 缺失时 fail closed。
+
+`ADMIN` 对任意有效 Permission 自动获得本 Organization 内 `ALL`，但不能跨 Organization，不能绕过 `CREATOR_REVIEW`，也不绕过业务领域状态机。紧急越权必须等待 Slice 1D 的 reason + Audit + atomic audit semantics，不在 1C 提前实现。
+
+Authorization 只接受最小 target facts，并通过 `RequestContext.actor.userId` 每次读取当前已提交 Role Assignment。Role、Permission 和 Data Scope 不进入 Session、RequestContext 或 JWT snapshot；不建立授权 cache。Role revoke 提交后只影响新的授权检查，已经完成授权判断的 in-flight Use Case 不追溯取消。

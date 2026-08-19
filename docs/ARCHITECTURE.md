@@ -10,6 +10,10 @@
 
 最终权限由用户身份、功能权限、组织、Data Scope、对象归属、对象状态和创建人与审核人隔离共同决定。Data Scope 至少支持 `ALL`、`ORG_SUBTREE`、`ORG_UNIT`、`ASSIGNED`、`OWN_CREATED`、`NONE`。权限必须在服务端校验；前端隐藏按钮不能替代授权。审核与关键业务写入须与审计在同一事务提交。
 
+Slice 1C 的 Authorization 位于 `src/platform/authorization`，只通过模块 `index.ts` 对外提供结构化 evaluate/require 能力和底层 Role Assignment application capabilities。业务模块传入最小 `AuthorizationTarget` facts，不得把 Prisma Model、业务 Entity 或业务状态机传入 Authorization。Permission Policy 留在未来各业务模块的代码中；Authorization 不拥有全业务权限矩阵。
+
+Authorization 以 `RequestContext.actor.userId` 实时读取已提交 Role Assignment，不向 RequestContext、Session 或 JWT 写入授权快照。`ORG_SUBTREE` 只经 `src/platform/organization/index.ts` 暴露的只读 subtree capability 判断，不导入 Organization infrastructure，也不改变 D-026。数据库唯一约束裁决 concurrent exact assignment；不增加全局 authorization lock。
+
 ## Session
 
 使用数据库可撤销 Session。每个账号最多三条有效设备 Session；第四台设备登录时必须先撤销一台已有设备。后端必须通过事务保证设备上限，不能只依赖前端计数。
