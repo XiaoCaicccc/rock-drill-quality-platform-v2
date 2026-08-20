@@ -1,6 +1,6 @@
 # ACTIVE PLAN
 
-## Status: NO ACTIVE IMPLEMENTATION PLAN
+Status: NO ACTIVE IMPLEMENTATION PLAN
 
 Slice 1D — User Management / Access Closure / Audit Foundation 已完成并由 PR #9 合并进入 `master`。post-merge authoritative state 已同步；当前没有已授权的 active implementation。
 
