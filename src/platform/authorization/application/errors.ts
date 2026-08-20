@@ -8,7 +8,8 @@ export type AuthorizationErrorKind =
   | "ROLE_ASSIGNMENT_CONFLICT"
   | "ROLE_ASSIGNMENT_NOT_FOUND"
   | "AUTHENTICATION_REQUIRED"
-  | "PERMISSION_DENIED";
+  | "PERMISSION_DENIED"
+  | "LAST_EFFECTIVE_ADMIN";
 
 export function authorizationError(kind: AuthorizationErrorKind, cause?: unknown): AppError {
   const invalid = kind === "INVALID_ROLE_ASSIGNMENT_INPUT";
@@ -20,7 +21,7 @@ export function authorizationError(kind: AuthorizationErrorKind, cause?: unknown
     code: invalid ? "PLATFORM.VALIDATION_FAILED" : notFound ? "RESOURCE.NOT_FOUND" : conflict ? "STATE.CONFLICT" : authentication ? "AUTH.AUTHENTICATION_REQUIRED" : denied ? "AUTH.PERMISSION_DENIED" : "BUSINESS_RULE.VIOLATION",
     httpStatus: invalid ? 400 : notFound ? 404 : conflict ? 409 : authentication ? 401 : denied ? 403 : 422,
     internalMessage: kind,
-    publicMessage: authentication ? "需要认证。" : denied ? "没有执行此操作的权限。" : "请求无法完成。",
+    publicMessage: authentication ? "需要认证。" : denied ? "没有执行此操作的权限。" : kind === "LAST_EFFECTIVE_ADMIN" ? "此操作会移除最后一个有效管理员。" : "请求无法完成。",
     cause,
   });
 }

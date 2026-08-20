@@ -14,6 +14,10 @@ Slice 1C 的 Authorization 位于 `src/platform/authorization`，只通过模块
 
 Authorization 以 `RequestContext.actor.userId` 实时读取已提交 Role Assignment，不向 RequestContext、Session 或 JWT 写入授权快照。`ORG_SUBTREE` 只经 `src/platform/organization/index.ts` 暴露的只读 subtree capability 判断，不导入 Organization infrastructure，也不改变 D-026。数据库唯一约束裁决 concurrent exact assignment；不增加全局 authorization lock。
 
+Slice 1D 的 Audit 位于 `src/platform/audit`，模块外只通过 `index.ts` 使用 event validation、transaction-bound recorder contract 与 query capability。Audit 公共契约不暴露 Prisma Client、Prisma Model、TransactionClient 或 raw SQL helper；拥有业务事务的 Identity / Session 与 Authorization adapter 以窄 recorder callback 在同一 transaction 中写入 Audit。
+
+Account 状态与 ADMIN revoke 共享 Organization row `FOR UPDATE` access-liveness boundary；它独立于且不替换 D-026 的 Organization hierarchy advisory lock。Transport 层负责 authentication、RequestContext、permission 与 same-Organization target 组合，mutation invariant 与 Audit atomicity仍由服务端 application transaction 最终保证。
+
 ## Session
 
 使用数据库可撤销 Session。每个账号最多三条有效设备 Session；第四台设备登录时必须先撤销一台已有设备。后端必须通过事务保证设备上限，不能只依赖前端计数。

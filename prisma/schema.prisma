@@ -21,6 +21,7 @@ model Organization {
   updatedAt DateTime           @updatedAt @db.Timestamptz(6)
   orgUnits  OrgUnit[]
   accounts  Account[]
+  auditLogs AuditLog[]
 
   @@map("organization")
 }
@@ -78,6 +79,7 @@ model Account {
   primaryOrgUnit    OrgUnit       @relation("AccountPrimaryOrgUnit", fields: [primaryOrgUnitId, organizationId], references: [id, organizationId], onDelete: Restrict)
   sessions          Session[]
   roleAssignments   AccountRoleAssignment[] @relation("AccountRoleAssignments")
+  actorAuditLogs    AuditLog[]               @relation("AuditActorAccount")
 
   @@unique([id, organizationId], map: "account_id_organization_id_key")
   @@index([organizationId], map: "account_organization_id_idx")
@@ -115,4 +117,32 @@ model Session {
   @@index([accountId, expiresAt], map: "session_account_id_expires_at_idx")
   @@index([accountId, revokedAt], map: "session_account_id_revoked_at_idx")
   @@map("session")
+}
+
+enum AuditActorKind {
+  USER
+  SYSTEM
+}
+
+model AuditLog {
+  id               String         @id @default(uuid()) @db.Uuid
+  organizationId   String         @db.Uuid
+  actorKind         AuditActorKind
+  actorAccountId   String?        @db.Uuid
+  actorSessionId   String?        @db.Uuid
+  requestId         String         @db.VarChar(128)
+  action            String         @db.VarChar(128)
+  targetType        String         @db.VarChar(128)
+  targetId          String         @db.VarChar(128)
+  reason            String?        @db.VarChar(500)
+  details           Json?          @db.JsonB
+  occurredAt        DateTime       @default(now()) @db.Timestamptz(6)
+  organization     Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  actorAccount      Account?       @relation("AuditActorAccount", fields: [actorAccountId, organizationId], references: [id, organizationId], onDelete: Restrict)
+
+  @@index([organizationId, occurredAt], map: "audit_log_organization_occurred_at_idx")
+  @@index([organizationId, actorAccountId, occurredAt], map: "audit_log_organization_actor_occurred_at_idx")
+  @@index([organizationId, action, occurredAt], map: "audit_log_organization_action_occurred_at_idx")
+  @@index([organizationId, targetType, targetId], map: "audit_log_organization_target_idx")
+  @@map("audit_log")
 }

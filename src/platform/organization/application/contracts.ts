@@ -19,6 +19,7 @@ export interface MoveOrgUnitInput { readonly orgUnitId: string; readonly newPare
 export interface SetOrgUnitStatusInput { readonly orgUnitId: string; readonly status: OrganizationStatus; }
 export interface SetOrganizationStatusInput { readonly organizationId: string; readonly status: OrganizationStatus; }
 export interface IsOrgUnitInSubtreeInput { readonly organizationId: string; readonly ancestorOrgUnitId: string; readonly candidateOrgUnitId: string; }
+export interface ListOrgUnitsInput { readonly organizationId: string; readonly activeOnly?: boolean; }
 
 export interface OrganizationService {
   createOrganizationWithRoot(input: CreateOrganizationWithRootInput): Promise<{ organization: OrganizationDto; rootOrgUnit: OrgUnitDto }>;
@@ -28,4 +29,5 @@ export interface OrganizationService {
   setOrgUnitStatus(input: SetOrgUnitStatusInput): Promise<OrgUnitDto>;
   setOrganizationStatus(input: SetOrganizationStatusInput): Promise<OrganizationDto>;
   isOrgUnitInSubtree(input: IsOrgUnitInSubtreeInput): Promise<boolean>;
+  listOrgUnits(input: ListOrgUnitsInput): Promise<readonly OrgUnitDto[]>;
 }

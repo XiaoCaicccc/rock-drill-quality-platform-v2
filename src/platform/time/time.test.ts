@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BUSINESS_TIME_ZONE, businessDateFromInstant, formatInstant, isBusinessDate, nowInstant, parseBusinessDate, parseInstant } from "./index";
+import { BUSINESS_TIME_ZONE, businessDateFromInstant, businessDateTimeInputToInstant, formatInstant, formatInstantForBusinessDisplay, isBusinessDate, nowInstant, parseBusinessDate, parseInstant } from "./index";
 
 describe("platform time", () => {
   it("validates real business calendar dates", () => {
@@ -28,6 +28,17 @@ describe("platform time", () => {
   it("uses Asia/Shanghai independently of the runtime local time zone", () => {
     expect(BUSINESS_TIME_ZONE).toBe("Asia/Shanghai");
     expect(businessDateFromInstant(parseInstant("2026-07-29T16:30:00.000Z"))).toBe("2026-07-30");
+  });
+
+  it("converts Asia/Shanghai filter inputs to UTC instants at day boundaries", () => {
+    expect(businessDateTimeInputToInstant("2026-08-20T00:00")).toBe("2026-08-19T16:00:00.000Z");
+    expect(businessDateTimeInputToInstant("2026-08-20T23:59:59")).toBe("2026-08-20T15:59:59.000Z");
+    expect(() => businessDateTimeInputToInstant("2026-08-20T00:00Z")).toThrow(RangeError);
+  });
+
+  it("formats UTC instants using the explicit Asia/Shanghai user convention", () => {
+    expect(formatInstantForBusinessDisplay("2026-08-19T16:00:00.000Z")).toBe("2026-08-20 00:00:00");
+    expect(formatInstantForBusinessDisplay("2026-08-20T15:59:59.000Z")).toBe("2026-08-20 23:59:59");
   });
 
   it("uses an injected clock for deterministic nowInstant", () => {

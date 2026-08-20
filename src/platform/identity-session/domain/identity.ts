@@ -32,3 +32,14 @@ export interface AuthenticatedSessionDto {
   readonly account: AccountDto;
   readonly session: SessionDto;
 }
+
+export interface AccountDetailDto extends AccountDto {
+  readonly primaryOrgUnit: { readonly id: string; readonly code: string; readonly name: string; readonly status: "ACTIVE" | "INACTIVE" };
+}
+
+export interface AccountPageDto {
+  readonly items: readonly AccountDetailDto[];
+  readonly page: number;
+  readonly pageSize: number;
+  readonly total: number;
+}

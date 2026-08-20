@@ -83,3 +83,16 @@ Permission 使用代码声明的 `module.business_action` policy，不建立 Per
 `ADMIN` 对任意有效 Permission 自动获得本 Organization 内 `ALL`，但不能跨 Organization，不能绕过 `CREATOR_REVIEW`，也不绕过业务领域状态机。紧急越权必须等待 Slice 1D 的 reason + Audit + atomic audit semantics，不在 1C 提前实现。
 
 Authorization 只接受最小 target facts，并通过 `RequestContext.actor.userId` 每次读取当前已提交 Role Assignment。Role、Permission 和 Data Scope 不进入 Session、RequestContext 或 JWT snapshot；不建立授权 cache。Role revoke 提交后只影响新的授权检查，已经完成授权判断的 in-flight Use Case 不追溯取消。
+
+## D-029 — Access management, last-admin liveness and atomic Audit
+
+状态：已确认（Accepted）
+日期：2026-08-19
+
+Slice 1D 的平台管理能力仅授予本 Organization 的 `ADMIN`；其他四个固定 Role 在本阶段不获得 Account、Role Assignment、Organization selector 或 Audit 管理 grant。Account 可以没有 Role Assignment，username 创建后不可变，历史 Account 不删除而以 `INACTIVE` 表达停用；`Account.primaryOrgUnitId` 仍只表达组织身份，不得自动改变 Role scope。
+
+任何可能减少有效 Admin Account 数量的 Account 状态 mutation 或 ADMIN Role Assignment revoke，都在业务事务内先锁定 Organization row，再 fresh-read 并以 `COUNT(DISTINCT accountId)` 验证至少保留一个有效 Admin。该 row lock 只服务 access-admin liveness，不修改 D-026 的 hierarchy/status advisory-lock 语义。
+
+自助改密保留当前 Session、撤销其他 active Sessions；管理员只能重置同 Organization 的其他 Account，重置后撤销目标全部 active Sessions且不改变 Account status。登录在 Argon2 验证后必须于 Account row lock 内比较 fresh passwordHash，关闭 reset/change 与旧密码登录的竞态。
+
+Audit 使用 `USER` / `SYSTEM` actor，稳定 action/target machine codes 和递归 secret-key 拒绝。关键 Account、Role Assignment、password 与 bootstrap mutation 和 AuditLog insert 必须在同一 PostgreSQL transaction 提交；失败尝试不产生业务 Audit。`bootstrap-admin` 只用于系统尚无任何 ADMIN assignment 时的初始建权：fresh install 原子创建 Account、ADMIN assignment 与 SYSTEM Audit；已有 1B Account 时可明确晋升一个符合条件的 Account；一旦存在任意 ADMIN assignment 即永久冲突。Slice 1D 不实现 emergency business override。

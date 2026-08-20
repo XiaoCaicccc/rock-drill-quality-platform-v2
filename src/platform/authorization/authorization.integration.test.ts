@@ -42,6 +42,7 @@ function context(accountId: string, organizationId: string) {
 afterEach(async () => {
   if (organizationIds.length === 0) return;
   const ids = [...organizationIds];
+  await prisma.auditLog.deleteMany({ where: { organizationId: { in: ids } } });
   await prisma.accountRoleAssignment.deleteMany({ where: { organizationId: { in: ids } } });
   await prisma.session.deleteMany({ where: { account: { organizationId: { in: ids } } } });
   await prisma.account.deleteMany({ where: { organizationId: { in: ids } } });
@@ -120,5 +121,14 @@ describe("Authorization PostgreSQL acceptance", () => {
     await expect(service.assignRoleToAccount({ accountId: account.id, organizationId: first.organization.id, role: "VIEWER", scopeOrgUnitId: second.rootOrgUnit.id })).rejects.toMatchObject({ internalMessage: "CROSS_ORGANIZATION_ASSIGNMENT" });
     await expect(service.assignRoleToAccount({ accountId: randomUUID(), organizationId: first.organization.id, role: "VIEWER", scopeOrgUnitId: first.rootOrgUnit.id })).rejects.toMatchObject({ internalMessage: "ACCOUNT_NOT_FOUND" });
     await expect(service.assignRoleToAccount({ accountId: account.id, organizationId: first.organization.id, role: "VIEWER", scopeOrgUnitId: randomUUID() })).rejects.toMatchObject({ internalMessage: "SCOPE_ORG_UNIT_NOT_FOUND" });
+  });
+
+  it("preserves the Slice 1C legacy inactive-scope contract while managed assignment remains active-scope only", async () => {
+    const org = await createOrganization(); const account = await createAccount(org.organization.id, org.rootOrgUnit.id);
+    const inactive = await prisma.orgUnit.create({ data: { organizationId: org.organization.id, parentId: org.rootOrgUnit.id, code: "INACTIVE", name: "Inactive", status: "INACTIVE", sortOrder: 0 } });
+    const legacy = await service.assignRoleToAccount({ accountId: account.id, organizationId: org.organization.id, role: "VIEWER", scopeOrgUnitId: inactive.id });
+    expect(legacy).toMatchObject({ accountId: account.id, scopeOrgUnitId: inactive.id });
+    expect(await prisma.auditLog.count({ where: { organizationId: org.organization.id, actorKind: "SYSTEM", action: "role_assignment.assign", targetId: legacy.id } })).toBe(1);
+    await expect(service.assignManagedRole({ context: context(account.id, org.organization.id), accountId: account.id, role: "ENGINEER", scopeOrgUnitId: inactive.id })).rejects.toMatchObject({ internalMessage: "SCOPE_ORG_UNIT_NOT_FOUND" });
   });
 });
