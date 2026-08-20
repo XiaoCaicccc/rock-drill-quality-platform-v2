@@ -1,6 +1,6 @@
 # 当前状态
 
-Slice 1D — User Management / Access Closure / Audit Foundation：`CLOSED / completed`。PR #9 已人工合并进入 `master`，merge commit 为 `74b0069011eded869bf05ced5e1758b21c04b1f5`；implementation commit 为 `577b622da736389fe3a0513848d87472b94606f8`，closure docs commit 为 `b7713df12655a7d2f193420a2abc936c839aa9e8`；implementation CI 与 post-merge master CI 均 PASS。verification baseline：21 个 ordinary test files / 136 tests PASS；5 个 PostgreSQL test files / 53 tests PASS；`db:validate`、`db:generate`、`check:full` 与 `git diff --check` PASS。当前 active implementation: `NONE`。范围仅限已批准的 Slice 1D；不得自动进入 Slice 2A+。
+Slice 1D — User Management / Access Closure / Audit Foundation：`CLOSED / completed`。PR #9 已人工合并进入 `master`，merge commit 为 `74b0069011eded869bf05ced5e1758b21c04b1f5`；implementation commit 为 `577b622da736389fe3a0513848d87472b94606f8`，closure docs commit 为 `b7713df12655a7d2f193420a2abc936c839aa9e8`；post-merge authoritative docs 已在 master 同步。implementation CI 与 post-merge master CI 均 PASS。verification baseline：21 个 ordinary test files / 136 tests PASS；5 个 PostgreSQL test files / 53 tests PASS；`db:validate`、`db:generate`、`check:full` 与 `git diff --check` PASS。当前 active implementation: `NONE`。范围仅限已批准的 Slice 1D；不得自动进入 Slice 2A+。
 
 Slice 1C — Role / Permission / Data Scope Authorization Foundation：`CLOSED / completed`。PR #7 已人工合并进入 `master`，merge commit 为 `25413578eec88d8a4d7c06febe997b49358b9cec`；verification baseline: PASS。
 
