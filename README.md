@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-V2 实施路线已冻结；Slice 1A、Slice 1B 与 Slice 1C 均已完成。Slice 1D — User Management / Access Closure / Audit Foundation 已通过 `HUMAN_GATE_START`，当前 active implementation: Slice 1D；不得进入 Slice 2A+。数据库基础继续采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离。
+V2 实施路线已冻结；Slice 1A、Slice 1B 与 Slice 1C 均已完成。Slice 1D — User Management / Access Closure / Audit Foundation 已通过 `HUMAN_GATE_START`，当前处于 `CLOSURE`，PR #9 的 implementation CI 已对提交 `577b622` 通过；当前 active implementation: Slice 1D，尚未 READY_TO_MERGE，不得进入 Slice 2A+。数据库基础继续采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离。
 
 ## 权威入口
 

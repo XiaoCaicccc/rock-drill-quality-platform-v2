@@ -1,10 +1,10 @@
 # ACTIVE PLAN
 
-## Status: ACTIVE — Slice 1D
+## Status: CLOSURE — Slice 1D
 
-Slice 1D — User Management / Access Closure / Audit Foundation 已通过 `HUMAN_GATE_START`，在 `feat/slice-1d-access-closure` 上执行。
+Slice 1D — User Management / Access Closure / Audit Foundation 已通过 `HUMAN_GATE_START`，在 `feat/slice-1d-access-closure` 上执行；Draft PR #9 的 implementation CI 已绑定 `577b622da736389fe3a0513848d87472b94606f8` 并 PASS，当前执行 closure docs/commit 与 final CI。
 
-当前从 `BLOCKED` checkpoint 执行一次人工批准的 exceptional repair extension：normal repair rounds `5/5` 保持不变，exceptional human-approved repair extension `1/1`。本次 repair 仅处理独立审阅已报告的 mutation capability invariant、OrgUnit 错误契约、login redirect、Audit 时间契约、security/API negative matrix 与状态文档一致性；在完整独立审阅达到 `BLOCKER 0 / MAJOR 0` 前不得 commit、push 或创建 PR。
+本次人工批准的 exceptional repair extension 已完成：normal repair rounds `5/5` 保持不变，exceptional human-approved repair extension `1/1`。独立审阅结果为 `BLOCKER 0 / MAJOR 0`；本阶段仅完成 closure 文档与 CI 收口，不重新打开 Slice 1C，不扩大 Slice 1D 范围。
 
 ## Objective
 
@@ -36,4 +36,4 @@ Slice 1D — User Management / Access Closure / Audit Foundation 已通过 `HUMA
 - PostgreSQL `ACCESS-DB-01`～`ACCESS-DB-12` 通过确定性真实数据库测试；Slice 0、1A、1B、1C 全部不回归。
 - `npm run db:validate`、`npm run db:generate`、`npm run check:full` 与 `git diff --check` PASS。
 - 独立审查为 BLOCKER 0 / MAJOR 0；implementation CI 与 closure CI 均绑定精确 SHA 并 PASS。
-- 流程只到 `READY_TO_MERGE`，等待 `HUMAN_GATE_MERGE`；不得自动合并或开始 Slice 2A。
+- 当前 closure commit 通过最终 CI 后流程才可进入 `READY_TO_MERGE`，等待 `HUMAN_GATE_MERGE`；不得自动合并或开始 Slice 2A。

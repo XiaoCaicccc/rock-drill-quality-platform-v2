@@ -1,6 +1,6 @@
 # 当前状态
 
-Slice 1D — User Management / Access Closure / Audit Foundation：`ACTIVE / authorized`。`HUMAN_GATE_START` 已通过，目标分支为 `feat/slice-1d-access-closure`；当前 active implementation: `Slice 1D`。范围仅限用户管理、角色分配、密码与 Session 安全、Last Effective Admin、Audit foundation/query/UI、bootstrap-admin closure 及真实 PostgreSQL 验收，不得进入 Slice 2A+。
+Slice 1D — User Management / Access Closure / Audit Foundation：`CLOSURE`。`HUMAN_GATE_START` 已通过，目标分支为 `feat/slice-1d-access-closure`，Draft PR #9 已创建；implementation CI 已绑定提交 `577b622da736389fe3a0513848d87472b94606f8` 并 PASS。当前 active implementation: `Slice 1D`；closure commit 与 final CI 尚未完成，尚未进入 `READY_TO_MERGE`。范围仅限用户管理、角色分配、密码与 Session 安全、Last Effective Admin、Audit foundation/query/UI、bootstrap-admin closure 及真实 PostgreSQL 验收，不得进入 Slice 2A+。
 
 Slice 1C — Role / Permission / Data Scope Authorization Foundation：`CLOSED / completed`。PR #7 已人工合并进入 `master`，merge commit 为 `25413578eec88d8a4d7c06febe997b49358b9cec`；verification baseline: PASS。
 
@@ -22,4 +22,4 @@ Slice 0B-3 已完成：数据库基础采用 PostgreSQL 17.10 与 Prisma 6.19.3�
 
 Slice 0B-4 已完成：GitHub Actions CI 位于 `.github/workflows/ci.yml`，在针对 `master` 的 pull request、推送到 `master` 及手动触发时运行。CI 使用 Node.js 24.18.0、npm 和隔离的 PostgreSQL 17 service container，已成功执行 `db:validate`、`db:generate` 与 `check:full`。`GET /api/health` 是无数据库依赖、无 Prisma Client 的 Node.js liveness endpoint；GitHub Actions verify 已通过，Vercel Preview 为 Ready。
 
-Slice 1C closure 时的普通测试基线为 16 个文件、79/79 tests passed；真实 PostgreSQL 数据库测试基线为 4 个文件、36/36 tests passed。V2 第一阶段 Slice 0～8 路线已冻结，Slice 0A、0B-1、0B-2、0B-3、0B-4、Slice 1A、Slice 1B 与 Slice 1C 已完成；当前 Slice 1D 是唯一 active implementation，正在执行人工批准的 exceptional repair extension `1/1`，尚未进入 closure。Organization 位于 `src/platform/organization`，Identity / Session 位于 `src/platform/identity-session`，Authorization 位于 `src/platform/authorization`；`.env` 和本地连接信息未进入 Git。
+Slice 1C closure 时的普通测试基线为 16 个文件、79/79 tests passed；真实 PostgreSQL 数据库测试基线为 4 个文件、36/36 tests passed。V2 第一阶段 Slice 0～8 路线已冻结，Slice 0A、0B-1、0B-2、0B-3、0B-4、Slice 1A、Slice 1B 与 Slice 1C 已完成；当前 Slice 1D 是唯一 active implementation，处于 `CLOSURE`，exceptional repair extension `1/1` 已完成，独立审阅为 BLOCKER 0 / MAJOR 0，implementation CI 已通过，closure CI 待执行。Organization 位于 `src/platform/organization`，Identity / Session 位于 `src/platform/identity-session`，Authorization 位于 `src/platform/authorization`；`.env` 和本地连接信息未进入 Git。
