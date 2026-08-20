@@ -5,5 +5,5 @@ export function createOrganizationService() {
   return createOrganizationServiceForPrisma(getPrismaClient());
 }
 
-export type { CreateOrganizationWithRootInput, CreateOrgUnitInput, IsOrgUnitInSubtreeInput, MoveOrgUnitInput, OrganizationService, RenameOrgUnitInput, SetOrganizationStatusInput, SetOrgUnitStatusInput } from "./application/contracts";
+export type { CreateOrganizationWithRootInput, CreateOrgUnitInput, IsOrgUnitInSubtreeInput, ListOrgUnitsInput, MoveOrgUnitInput, OrganizationService, RenameOrgUnitInput, SetOrganizationStatusInput, SetOrgUnitStatusInput } from "./application/contracts";
 export type { OrganizationDto, OrganizationStatus, OrgUnitDto } from "./domain/organization";

@@ -9,5 +9,5 @@ export function createAuthorizationService() {
 
 export { definePermission } from "./domain/permission";
 export { authorizationReasons, dataScopes, roleCodes } from "./domain/authorization";
-export type { AssignRoleToAccountInput, AuthorizationService, ListAccountRoleAssignmentsInput, RevokeRoleAssignmentInput } from "./application/contracts";
+export type { AssignManagedRoleInput, AssignRoleToAccountInput, AuthorizationService, ListAccountRoleAssignmentsInput, ListManagedRoleAssignmentsInput, RevokeManagedRoleInput, RevokeRoleAssignmentInput } from "./application/contracts";
 export type { AccountRoleAssignmentDto, AuthorizationDecision, AuthorizationReason, AuthorizationTarget, DataScope, EvaluateAuthorizationInput, PermissionCode, PermissionDefinition, PermissionDefinitionInput, PermissionGrant, PermissionSeparation, RoleCode } from "./domain/authorization";

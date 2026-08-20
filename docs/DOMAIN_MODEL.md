@@ -33,6 +33,14 @@
 - `ADMIN` 对任意有效 Permission 在本 Organization 内自动具有 `ALL`，但不能跨 Organization，也不能绕过 `CREATOR_REVIEW` 或未来业务状态机。
 - 每次授权都读取当前已提交 Role Assignment，不在 Session 或 RequestContext 中保存 Role、Permission 或 Data Scope 快照。撤销提交后新的授权检查立即失效；已完成授权判断的 in-flight Use Case 不被追溯取消。
 
+### Slice 1D Access closure / Audit
+
+- Account username 创建后不可变，Account 可以没有 Role Assignment；停用使用 `INACTIVE`，不删除历史身份。
+- 有效 Admin Account 必须同时满足 Organization、Account 与 primary OrgUnit 均为 `ACTIVE` 且至少有一个 `ADMIN` assignment；同一 Account 的多个 ADMIN assignments 只计一次。
+- 自助改密保留当前 Session 并撤销其余 active Sessions；管理员重置他人密码撤销目标全部 active Sessions，不改变目标 Account status。
+- `AuditLog` 属于一个 Organization；USER actor 必须同时保存 same-Organization actor Account 与历史 session UUID snapshot，SYSTEM actor 的 Account/Session 字段必须为空。Audit 不依赖 Session FK，历史不会阻止 Session retention。
+- Audit 只记录成功提交的业务事实；Account、Role Assignment、password 与 bootstrap mutation 必须和对应 AuditLog 在同一事务内提交或回滚。
+
 ## 生命周期与追溯
 
 - `PartMaster` 与 `PartRevision` 分离；已发布版本不得覆盖修改。

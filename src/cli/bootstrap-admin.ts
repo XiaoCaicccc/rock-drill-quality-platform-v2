@@ -2,19 +2,21 @@ import { AppError } from "../platform/errors";
 import { createIdentitySessionService } from "../platform/identity-session";
 import type { AccountDto, IdentitySessionService } from "../platform/identity-session";
 
-export interface BootstrapCliOptions {
+export interface BootstrapCreateCliOptions {
   readonly organizationId: string;
   readonly primaryOrgUnitId: string;
   readonly username: string;
   readonly displayName: string;
 }
+export interface BootstrapPromoteCliOptions { readonly existingAccountId: string; }
+export type BootstrapCliOptions = BootstrapCreateCliOptions | BootstrapPromoteCliOptions;
 
 export interface BootstrapCliDependencies {
   readonly readPassword?: () => Promise<string>;
   readonly createService?: () => IdentitySessionService;
 }
 
-function usageError(): Error { return new Error("Usage requires --organization-id, --primary-org-unit-id, --username, and --display-name."); }
+function usageError(): Error { return new Error("Usage requires either --existing-account-id, or --organization-id, --primary-org-unit-id, --username, and --display-name."); }
 
 export function parseBootstrapArgs(argv: readonly string[]): BootstrapCliOptions {
   const values = new Map<string, string>();
@@ -22,8 +24,13 @@ export function parseBootstrapArgs(argv: readonly string[]): BootstrapCliOptions
     const key = argv[index];
     const value = argv[index + 1];
     if (key === undefined || value === undefined || !key.startsWith("--") || value.startsWith("--")) throw usageError();
-    if (!["--organization-id", "--primary-org-unit-id", "--username", "--display-name"].includes(key)) throw new Error("Unknown bootstrap option.");
+    if (!["--organization-id", "--primary-org-unit-id", "--username", "--display-name", "--existing-account-id"].includes(key)) throw new Error("Unknown bootstrap option.");
     values.set(key.slice(2), value);
+  }
+  const existingAccountId = values.get("existing-account-id");
+  if (existingAccountId) {
+    if (values.size !== 1) throw usageError();
+    return { existingAccountId };
   }
   const organizationId = values.get("organization-id");
   const primaryOrgUnitId = values.get("primary-org-unit-id");
@@ -55,8 +62,11 @@ export function readMaskedPassword(): Promise<string> {
 }
 
 export async function bootstrapFromCli(options: BootstrapCliOptions, dependencies: BootstrapCliDependencies = {}): Promise<AccountDto> {
+  const service = (dependencies.createService ?? createIdentitySessionService)();
+  if ("existingAccountId" in options) return service.bootstrapAdmin({ existingAccountId: options.existingAccountId, requestId: "bootstrap-admin" });
   const password = await (dependencies.readPassword ?? readMaskedPassword)();
-  return (dependencies.createService ?? createIdentitySessionService)().bootstrapInitialAccount({ ...options, password });
+  if (typeof service.bootstrapAdmin === "function") return service.bootstrapAdmin({ ...options, password, requestId: "bootstrap-admin" });
+  return service.bootstrapInitialAccount({ ...options, password });
 }
 
 export function safeBootstrapError(error: unknown): string {

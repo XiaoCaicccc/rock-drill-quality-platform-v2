@@ -6,5 +6,5 @@ export function createIdentitySessionService() {
   return createIdentitySessionServiceForPrisma(getPrismaClient(), { clock: systemClock });
 }
 
-export type { AuthenticateInput, BootstrapInitialAccountInput, CreateAccountInput, IdentitySessionDependencies, IdentitySessionService, RevokeOwnSessionInput, SetAccountStatusInput } from "./application/contracts";
-export type { AccountDto, AccountStatus, AuthenticatedSessionDto, OwnSessionDto, SessionDto } from "./domain/identity";
+export type { AccountDetailInput, AccountListInput, AuthenticateInput, BootstrapAdminInput, BootstrapInitialAccountInput, ChangeOwnPasswordInput, CreateAccountInput, IdentitySessionDependencies, IdentitySessionService, ManagedAccountInput, ResetManagedPasswordInput, RevokeOwnSessionInput, SetAccountStatusInput, SetManagedAccountStatusInput, UpdateManagedAccountInput } from "./application/contracts";
+export type { AccountDetailDto, AccountDto, AccountPageDto, AccountStatus, AuthenticatedSessionDto, OwnSessionDto, SessionDto } from "./domain/identity";

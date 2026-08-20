@@ -51,6 +51,11 @@ async function requireOrgUnit(transaction: OrganizationTransaction, orgUnitId: s
 
 export function createOrganizationServiceForPrisma(prisma: PrismaClient): OrganizationService {
   return {
+    async listOrgUnits(input) {
+      const units = await prisma.orgUnit.findMany({ where: { organizationId: input.organizationId, ...(input.activeOnly ? { status: "ACTIVE" } : {}) }, orderBy: [{ sortOrder: "asc" }, { code: "asc" }, { id: "asc" }] });
+      return units.map(toOrgUnitDto);
+    },
+
     async isOrgUnitInSubtree(input: IsOrgUnitInSubtreeInput) {
       const units = await prisma.orgUnit.findMany({
         where: { organizationId: input.organizationId },

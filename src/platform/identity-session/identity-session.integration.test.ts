@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import type { Prisma, PrismaClient } from "@prisma/client";
-import { afterAll, afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { bootstrapFromCli } from "../../cli/bootstrap-admin";
 import { createTestPrismaClient } from "../database/prisma-client";
@@ -13,6 +13,7 @@ let currentTime = new Date("2026-08-19T00:00:00.000Z");
 const clock = { now: () => new Date(currentTime.getTime()) };
 const error = (code: string) => ({ code });
 const gatedTransactionOptions = { maxWait: 10_000, timeout: 60_000 };
+const repositoryTestOrganizationPrefixes = ["IDENTITY-", "AUTHZ-", "ORG-", "ACCESS-", "BOOT1-", "BOOT2-"] as const;
 
 function deferred<T = void>() {
   let resolve!: (value?: T | PromiseLike<T>) => void;
@@ -85,9 +86,26 @@ async function account(service = createIdentitySessionServiceForPrisma(prisma, {
   return { result, organization: created, service };
 }
 
+beforeAll(async () => {
+  const staleOrganizations = await prisma.organization.findMany({
+    where: { OR: repositoryTestOrganizationPrefixes.map((prefix) => ({ code: { startsWith: prefix } })) },
+    select: { id: true },
+  });
+  const ids = staleOrganizations.map(({ id }) => id);
+  if (ids.length === 0) return;
+  await prisma.auditLog.deleteMany({ where: { organizationId: { in: ids } } });
+  await prisma.accountRoleAssignment.deleteMany({ where: { organizationId: { in: ids } } });
+  await prisma.session.deleteMany({ where: { account: { organizationId: { in: ids } } } });
+  await prisma.account.deleteMany({ where: { organizationId: { in: ids } } });
+  await prisma.orgUnit.deleteMany({ where: { organizationId: { in: ids } } });
+  await prisma.organization.deleteMany({ where: { id: { in: ids } } });
+});
+
 afterEach(async () => {
   while (organizationIds.length > 0) {
     const organizationId = organizationIds.pop()!;
+    await prisma.auditLog.deleteMany({ where: { organizationId } });
+    await prisma.accountRoleAssignment.deleteMany({ where: { organizationId } });
     await prisma.session.deleteMany({ where: { account: { organizationId } } });
     await prisma.account.deleteMany({ where: { organizationId } });
     await prisma.orgUnit.deleteMany({ where: { organizationId } });
@@ -258,6 +276,9 @@ describe("Identity / Session PostgreSQL integration", () => {
     const cliAccount = await bootstrapFromCli(input, { readPassword: async () => password, createService });
     expect(cliAccount).not.toHaveProperty("passwordHash");
     await expect(bootstrapFromCli({ ...input, username: `${input.username}-again` }, { readPassword: async () => password, createService })).rejects.toMatchObject(error("STATE.CONFLICT"));
+    await prisma.auditLog.deleteMany({ where: { organizationId: created.organization.id } });
+    await prisma.accountRoleAssignment.deleteMany({ where: { organizationId: created.organization.id } });
+    await prisma.session.deleteMany({ where: { account: { organizationId: created.organization.id } } });
     await prisma.account.deleteMany({ where: { organizationId: created.organization.id } });
     const firstClient = createTestPrismaClient();
     const secondClient = createTestPrismaClient();
