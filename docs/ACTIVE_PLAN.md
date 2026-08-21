@@ -1,8 +1,8 @@
 # ACTIVE PLAN
 
-Status: VERIFY — Slice 2A
+Status: CLOSURE — Slice 2A
 
-Slice 2A — Part Category / Part Master / Numbering Foundation 已通过 `HUMAN_GATE_START`，目标分支为 `feat/slice-2a-part-master-numbering`；真实 `START` preflight 已 PASS，PLAN 已完成，当前进入 VERIFY，active implementation: `Slice 2A`。
+Slice 2A — Part Category / Part Master / Numbering Foundation 已通过 `HUMAN_GATE_START`，目标分支为 `feat/slice-2a-part-master-numbering`；真实 `START` preflight 与 PLAN 已完成，Draft PR #10 的 implementation CI run `32493511645` 已绑定提交 `7fee4a1f82656d7c627731b02faccb4edcc6f99b` 并 PASS，当前执行 closure docs/commit 与 final CI，active implementation: `Slice 2A`。
 
 ## Objective
 
@@ -24,8 +24,8 @@ Slice 2A — Part Category / Part Master / Numbering Foundation 已通过 `HUMAN
 ## Acceptance and delivery
 
 - `npm run db:validate`、`npm run db:generate`、`npm run check:full` 与 `git diff --check` PASS。
-- Independent review BLOCKER 0 / MAJOR 0；implementation CI 与 closure CI 均绑定精确 SHA 并 PASS。
-- 通过 `READY_TO_MERGE` 后等待 `HUMAN_GATE_MERGE`；不得自动 merge 或开始 Slice 2B。
+- Independent review 与 Human implementation review 均为 BLOCKER 0 / MAJOR 0；implementation CI 已绑定精确 SHA 并 PASS，closure CI 待执行。
+- 当前 closure commit 通过 final CI 后流程才可进入 `READY_TO_MERGE`，等待 `HUMAN_GATE_MERGE`；不得自动 merge 或开始 Slice 2B。
 
 Slice 1D — User Management / Access Closure / Audit Foundation 已完成并由 PR #9 合并进入 `master`；post-merge authoritative state 已同步，保持 `CLOSED / completed`。
 
