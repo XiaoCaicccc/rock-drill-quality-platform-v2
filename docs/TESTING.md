@@ -29,3 +29,9 @@ Slice 1C 的 `AUTHZ-DB-01`～`AUTHZ-DB-07` 必须在真实 PostgreSQL 上证明 
 Slice 2A 的真实 PostgreSQL 验收必须覆盖 PART-DB-01～PART-DB-17：PartCategory Organization persistence、同组织 normalizedName 唯一与跨组织同名、PartMaster 与 Category composite FK 的跨组织拒绝、同组织 partNumber 与 normalizedDrawingNumber 唯一、多个 NULL 图号、跨组织同图号、同组织并发编号唯一且高水位严格增加、组织序列隔离、并发 PartMaster 创建 distinct partNumber、PartMaster/Category mutation 与 Audit 原子提交和失败回滚、Category INACTIVE 不级联既有 PartMaster，以及失败创建消耗号码且永不重发。
 
 编号并发证据必须证明真实 overlapping PostgreSQL requests 到达数据库 atomic allocation 边界，不能只使用 `Promise.all()`、sleep、settle 顺序、源码 grep 或 Prisma schema 文本匹配。行为/API/UI 验收还必须覆盖五角色权限矩阵、cross-Organization direct UUID 的 404、client-supplied protected fields、Category/PartMaster 状态语义、no-op mutation 无 Audit、drawingNumber NULL/value/change/clear、inactive Category 拒绝新建或重新指派、partNumber immutable、no delete，以及 PartMaster detail DTO 不泄露 organizationId、normalizedDrawingNumber 或 NumberingSequence。普通测试和真实 PostgreSQL 测试均必须保持 Slice 0～1D 基线不回归。
+
+## Slice 2B Part revision acceptance
+
+Slice 2B 必须以真实 PostgreSQL 证明 REV-DB-01～REV-DB-20：Revision/Review 的 Organization composite FK、PartMaster 内 revisionNo 唯一、不同 PartMaster 的独立编号、partial unique 单一未发布版本、首版及下一版并发创建、drawingNumber 与首版创建竞争、drawingNumber freeze 的应用与数据库守卫、INACTIVE PartMaster 前置条件、状态与更新/审核竞争、RETURN/APPROVE 单胜、Review/Audit/状态或 release metadata 的原子提交与强制 Audit failure 回滚、RELEASED 不可变、多次退回/重提保留历史，以及 creator-review 分离和带 reason 的 ADMIN override。并发验收必须以独立 PostgreSQL connections、目标 row-lock 到达和数据库锁/等待事实证明，而不是 Promise settle 顺序。
+
+行为、API 与 UI 测试还必须覆盖全部合法/非法 transition、状态化 editability、权限矩阵和 IDOR、protected fields、no-op 无 Audit、Review DTO 无持久化泄露、return comment、approve optional comment、release prerequisite，以及 `npm run db:validate`、`npm run db:generate`、`npm run check:full` 和 PART-DB-01～PART-DB-17 回归。

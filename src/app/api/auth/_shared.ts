@@ -48,6 +48,15 @@ export async function readJsonObject(request: Request): Promise<Record<string, u
   return body as Record<string, unknown>;
 }
 
+export async function readOptionalJsonObject(request: Request): Promise<Record<string, unknown>> {
+  const bodyText = await request.text();
+  if (bodyText.trim() === "") return {};
+  let body: unknown;
+  try { body = JSON.parse(bodyText); } catch (cause) { throw new AppError({ code: "PLATFORM.VALIDATION_FAILED", httpStatus: 400, internalMessage: "INVALID_JSON_BODY", publicMessage: "请求格式无效。", cause }); }
+  if (typeof body !== "object" || body === null || Array.isArray(body)) throw new AppError({ code: "PLATFORM.VALIDATION_FAILED", httpStatus: 400, internalMessage: "INVALID_JSON_BODY", publicMessage: "请求格式无效。" });
+  return body as Record<string, unknown>;
+}
+
 export function assertOnlyKeys(body: Record<string, unknown>, allowed: readonly string[]): void {
   if (Object.keys(body).some((key) => !allowed.includes(key))) throw new AppError({ code: "PLATFORM.VALIDATION_FAILED", httpStatus: 400, internalMessage: "UNEXPECTED_REQUEST_FIELD", publicMessage: "请求字段无效。" });
 }

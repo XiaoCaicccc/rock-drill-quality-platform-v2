@@ -107,3 +107,12 @@ Slice 2A 建立 flat `PartCategory`、`PartMaster` 与 platform Numbering founda
 `PartCategory` 仅有 ACTIVE/INACTIVE，不实现层级；名称保存 trim 展示值并以 trim + lowercase 规范化，在 Organization 内唯一。`PartMaster` 的 `drawingNumber` 可选，展示值 trim、规范化值 trim + uppercase，在 Organization 内唯一且允许多个 NULL；`PartMaster(categoryId, organizationId)` 通过 composite FK 保证组织边界。Category 停用不级联 PartMaster，已有关系保留；PartMaster 与 Category 均不提供 delete；无业务值变化的 mutation 不写 Audit。
 
 Slice 2A 的 PartMaster 是 Organization-level enterprise master data；ENGINEER 获得 Category/PartMaster 的 view/create/update/set_status，QUALITY_MANAGER、INSPECTOR、VIEWER 只读，ADMIN 继续沿用同 Organization automatic ALL。Data Scope 为 ALL 且始终受 actor.organizationId 边界限制。所有真正业务 mutation 与 AuditLog 在同一 PostgreSQL transaction 中提交；跨 Organization direct UUID 统一表现为 RESOURCE.NOT_FOUND。SupplierRelation deferred；Slice 2B 引入 PartRevision 后重新审查已有 Revision 对 `drawingNumber` 修改的约束。
+
+## D-031 — Linear PartRevision lifecycle and drawing-number freeze
+
+状态：已确认（Accepted）
+日期：2026-08-22
+
+Slice 2B establishes an organization-scoped PartRevision lifecycle with immutable UUID identity, PartMaster-scoped integer `revisionNo`, immutable Review history, and a strict single-unreleased chain. A PostgreSQL partial unique index is the final guard for one non-RELEASED Revision, while the PartMaster row lock is the common serialization boundary for revision allocation, lifecycle prerequisites, and drawing-number update versus first-Revision creation. The Slice-local PartRevision transaction composition adapter owns the cross-Aggregate Prisma transaction, PartMaster/Revision/Review persistence and transaction-bound Audit recording; PartRevision application/domain sees only narrow typed capabilities. It is not a global UnitOfWork and exposes neither arbitrary transaction/model/SQL execution nor Prisma types. PartMaster stays independent of PartRevision persistence; its row-locked update/status path relies on the PostgreSQL trigger as the final drawing-number freeze guard.
+
+Only `DRAFT -> REVIEWING`, `RETURNED -> REVIEWING`, `REVIEWING -> RETURNED`, `REVIEWING -> APPROVED`, and `APPROVED -> RELEASED` are legal. Review and release are separate. The creator is denied ordinary RETURN/APPROVE; an ADMIN needs an explicit reasoned override that creates immutable Review and Audit evidence atomically. RELEASED is permanently immutable, and any Revision freezes PartMaster `drawingNumber`; other PartMaster fields retain Slice 2A semantics. No cancellation, delete, CAD/BOM/ECN/ECO, generic workflow/approval engine, or parallel Revision branch is introduced.

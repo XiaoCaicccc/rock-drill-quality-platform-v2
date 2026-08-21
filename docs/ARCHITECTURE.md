@@ -64,6 +64,10 @@ GitHub Actions 是当前仓库的 CI 基线，负责代码质量和真实 Postgr
 
 Slice 2A 的 PLM 依赖方向为 `PartMaster -> PartCategory public API -> platform`，并分别依赖 Numbering public API、Authorization 与 Audit public APIs。PartCategory 与 PartMaster 模块外只通过各自 `index.ts` 暴露领域 DTO、Use Case contract 和 service factory；不得暴露 PrismaClient、Prisma Model、TransactionClient、raw SQL helper 或 infrastructure internals。Slice 2A 不创建 PartRevision、Equipment、SupplierRelation 或后续 Slice 的空目录。
 
+### Slice 2B Part Revision boundary
+
+`src/modules/part-revision` owns Revision state, immutable Review decisions, revision DTOs and permission policies. Slice 2B additionally owns a slice-local transaction composition adapter in its infrastructure boundary: it alone holds the Prisma transaction, PartMaster/Revision/Review persistence access, row locks and transaction-bound Audit recorder for lifecycle use cases. The PartRevision application/domain receives only narrow typed lifecycle capabilities; no Prisma type, transaction client or SQL crosses its contracts or public index. CREATE locks PartMaster then creates Revision; SUBMIT/APPROVE/RELEASE lock PartMaster then Revision; RETURN and Revision update lock Revision only; reads take no business row lock. PartMaster never imports or queries PartRevision; its own update/status transaction locks and fresh-reads PartMaster, while the database trigger is the final drawing-number freeze guard. This adapter is neither a business-module cycle nor a global UnitOfWork, generic transaction callback, arbitrary model executor or SQL facade. Authorization, Audit, Time and Database remain public platform capabilities; API/UI compose only public services and DTOs.
+
 领域层不得依赖 Prisma、Next.js 或 React；应用层不得依赖 Next.js 页面和路由；基础设施层可以依赖 Prisma；`app` 层组合应用能力；平台模块不得反向依赖具体 PLM 或质量业务模块。
 
 ## Repository 规则
