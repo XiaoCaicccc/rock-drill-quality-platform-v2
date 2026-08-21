@@ -26,6 +26,10 @@ Account 状态与 ADMIN revoke 共享 Organization row `FOR UPDATE` access-liven
 
 企业业务时区固定为 `Asia/Shanghai`，业务日期、精确时间和有效区间须分别表达。编号与内部 ID 分离。二维码仅是统一对象入口，不保存第二份业务数据；第一阶段二维码内容必须登录后才能访问。
 
+### Slice 2A Numbering boundary
+
+`src/platform/numbering` 只依赖平台基础能力，并通过窄的 public API 提供 organization + key scoped、atomic、monotonic、non-gapless allocation；它不得依赖 `src/modules/**`、PartMaster、PartCategory 或任何业务 Entity。编号分配成功即永久消费，不回滚、不递减、不释放、不复用；Numbering allocation 本身不写 AuditLog，拥有业务事务的 PartMaster use case 在创建成功时与 AuditLog 同事务提交。
+
 ## Excel 导入
 
 Excel 导入必须经过上传、解析、映射、预览、校验、确认、事务写入和导入记录。服务端解析结果是唯一权威结果；前端只负责上传、映射、预览和确认，不允许前端与服务端使用两套可能产生不同结果的业务解析逻辑。导入必须保存原文件、字段映射、逐行结果和导入记录。
@@ -57,6 +61,8 @@ GitHub Actions 是当前仓库的 CI 基线，负责代码质量和真实 Postgr
 平台模块的长期目标路径为 `src/platform/`：`errors`、`time`、`request-context`、`database`、`organization`、`identity-session`、`authorization`、`audit`、`numbering`、`qr-access`、`file-metadata`、`import` 和 `observability`。Organization 属于平台模块；Slice 1A 的正确目标路径是 `src/platform/organization`，不属于 `src/modules` 下的普通业务模块。Identity、Session、Authorization 和 Audit 也属于平台模块。
 
 业务模块的长期目标路径为 `src/modules/`：`part-category`、`part-master`、`part-revision`、`supplier-relation`、`equipment`、`batch`、`part-instance`、`installation`、`inspection-template`、`inspection-task`、`inspection`、`quality-ledger`、`correction`、`nonconformance` 和 `report`。具体目录只在对应 Slice 开始时创建，不提前建立大量空目录。模块外只能通过正式公共入口使用能力；API 和 UI 不得直接操作 Prisma Model，Prisma 类型不得扩散为跨模块公共契约。
+
+Slice 2A 的 PLM 依赖方向为 `PartMaster -> PartCategory public API -> platform`，并分别依赖 Numbering public API、Authorization 与 Audit public APIs。PartCategory 与 PartMaster 模块外只通过各自 `index.ts` 暴露领域 DTO、Use Case contract 和 service factory；不得暴露 PrismaClient、Prisma Model、TransactionClient、raw SQL helper 或 infrastructure internals。Slice 2A 不创建 PartRevision、Equipment、SupplierRelation 或后续 Slice 的空目录。
 
 领域层不得依赖 Prisma、Next.js 或 React；应用层不得依赖 Next.js 页面和路由；基础设施层可以依赖 Prisma；`app` 层组合应用能力；平台模块不得反向依赖具体 PLM 或质量业务模块。
 

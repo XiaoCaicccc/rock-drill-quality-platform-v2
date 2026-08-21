@@ -22,6 +22,9 @@ model Organization {
   orgUnits  OrgUnit[]
   accounts  Account[]
   auditLogs AuditLog[]
+  numberingSequences NumberingSequence[]
+  partCategories PartCategory[]
+  partMasters PartMaster[]
 
   @@map("organization")
 }
@@ -145,4 +148,70 @@ model AuditLog {
   @@index([organizationId, action, occurredAt], map: "audit_log_organization_action_occurred_at_idx")
   @@index([organizationId, targetType, targetId], map: "audit_log_organization_target_idx")
   @@map("audit_log")
+}
+
+enum PartCategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PartMasterStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model NumberingSequence {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  key            String       @db.VarChar(128)
+  currentValue   BigInt       @default(0)
+  createdAt      DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @db.Timestamptz(6)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, key], map: "numbering_sequence_organization_id_key_key")
+  @@map("numbering_sequence")
+}
+
+model PartCategory {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String             @db.Uuid
+  name           String             @db.VarChar(200)
+  normalizedName String             @db.VarChar(200)
+  description    String?            @db.VarChar(2000)
+  status         PartCategoryStatus @default(ACTIVE)
+  createdAt      DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime           @updatedAt @db.Timestamptz(6)
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  partMasters    PartMaster[]
+
+  @@unique([organizationId, normalizedName], map: "part_category_organization_id_normalized_name_key")
+  @@unique([id, organizationId], map: "part_category_id_organization_id_key")
+  @@index([organizationId, status], map: "part_category_organization_id_status_idx")
+  @@index([organizationId, name], map: "part_category_organization_id_name_idx")
+  @@map("part_category")
+}
+
+model PartMaster {
+  id                      String          @id @default(uuid()) @db.Uuid
+  organizationId          String          @db.Uuid
+  categoryId              String          @db.Uuid
+  partNumber              String          @db.VarChar(64)
+  drawingNumber           String?         @db.VarChar(200)
+  normalizedDrawingNumber String?         @db.VarChar(200)
+  name                    String          @db.VarChar(200)
+  description             String?         @db.VarChar(2000)
+  status                  PartMasterStatus @default(ACTIVE)
+  createdAt               DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt               DateTime        @updatedAt @db.Timestamptz(6)
+  organization            Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  category                PartCategory    @relation(fields: [categoryId, organizationId], references: [id, organizationId], onDelete: Restrict)
+
+  @@unique([organizationId, partNumber], map: "part_master_organization_id_part_number_key")
+  @@unique([organizationId, normalizedDrawingNumber], map: "part_master_organization_id_normalized_drawing_number_key")
+  @@unique([id, organizationId], map: "part_master_id_organization_id_key")
+  @@index([organizationId, status], map: "part_master_organization_id_status_idx")
+  @@index([organizationId, categoryId], map: "part_master_organization_id_category_id_idx")
+  @@index([organizationId, name], map: "part_master_organization_id_name_idx")
+  @@map("part_master")
 }

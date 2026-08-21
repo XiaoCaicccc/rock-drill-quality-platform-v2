@@ -15,6 +15,14 @@
 - `ExternalIdentifier` 用于未来关联供应商条码、原始流水号、旧系统编号和第三方系统 ID。外部标识只能解析到内部 ID，不能成为模块间主关联。
 - 二维码须区分不可变内部 ID、业务编号、外部标识和可撤销二维码访问 Token。二维码只保存对象引用，不复制业务数据。
 
+## Slice 2A Part master foundation
+
+- `PartCategory` 是 organization-scoped flat category，只有 `ACTIVE` / `INACTIVE`；2A 不建立 `parentId`、category tree、move、cycle prevention 或 ancestor traversal。`name` 保存 trim 后的用户展示大小写，`normalizedName` 为 trim + lowercase，并在同一 Organization 内唯一。
+- `PartMaster.id` 是不可变内部 UUID；`partNumber` 是由 platform Numbering 自动生成、organization-scoped unique、创建后 immutable 的业务编号，格式为 `PART-` + minimum width 6。`drawingNumber` 是可选真实图号，展示值仅 trim，`normalizedDrawingNumber` 为 trim + uppercase；图号在同一 Organization 内唯一，NULL 可重复。
+- PartMaster 通过 `(categoryId, organizationId)` composite FK 关联同 Organization 的 PartCategory；不得使用 `partNumber` 或 `drawingNumber` 作为 FK。PartMaster 为 Organization-level enterprise master data，Category/PartMaster 不提供 delete，停用不级联或破坏既有关系。
+- Category status 只阻止新建或重新指派到 INACTIVE Category；已有关系保留。PartMaster status 与 Category status 独立，均允许 ACTIVE ↔ INACTIVE。无业务值变化的 mutation 返回当前 resource 且不写 Audit。
+- Slice 2B 引入 PartRevision 后，必须重新审查已有 Revision 的 PartMaster 是否仍允许任意修改 `drawingNumber`；2A 不实现 Revision existence check、released revision lock 或 revision lifecycle。
+
 ### Slice 1B Account / Session
 
 - 正式身份实体为 `Account`，不创建第二套 `User` 身份对象。Account 必须属于一个 Organization，并有一个属于同一 Organization 的 primary OrgUnit。

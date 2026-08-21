@@ -62,3 +62,8 @@ export async function requirePlatformPermission(context: RequestContext, permiss
   if (context.actor.kind !== "user") throw new AppError({ code: "AUTH.AUTHENTICATION_REQUIRED", httpStatus: 401, internalMessage: "AUTHENTICATION_REQUIRED", publicMessage: "需要认证。" });
   await createAuthorizationService().requireAuthorization({ context, permission, target: { organizationId: context.actor.organizationId } });
 }
+
+export async function requireBusinessPermission(context: RequestContext, permission: PermissionDefinition): Promise<void> {
+  if (context.actor.kind !== "user") throw new AppError({ code: "AUTH.AUTHENTICATION_REQUIRED", httpStatus: 401, internalMessage: "AUTHENTICATION_REQUIRED", publicMessage: "需要认证。" });
+  await createAuthorizationService().requireAuthorization({ context, permission, target: { organizationId: context.actor.organizationId } });
+}
