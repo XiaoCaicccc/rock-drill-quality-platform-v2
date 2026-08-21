@@ -96,3 +96,14 @@ Slice 1D 的平台管理能力仅授予本 Organization 的 `ADMIN`；其他四�
 自助改密保留当前 Session、撤销其他 active Sessions；管理员只能重置同 Organization 的其他 Account，重置后撤销目标全部 active Sessions且不改变 Account status。登录在 Argon2 验证后必须于 Account row lock 内比较 fresh passwordHash，关闭 reset/change 与旧密码登录的竞态。
 
 Audit 使用 `USER` / `SYSTEM` actor，稳定 action/target machine codes 和递归 secret-key 拒绝。关键 Account、Role Assignment、password 与 bootstrap mutation 和 AuditLog insert 必须在同一 PostgreSQL transaction 提交；失败尝试不产生业务 Audit。`bootstrap-admin` 只用于系统尚无任何 ADMIN assignment 时的初始建权：fresh install 原子创建 Account、ADMIN assignment 与 SYSTEM Audit；已有 1B Account 时可明确晋升一个符合条件的 Account；一旦存在任意 ADMIN assignment 即永久冲突。Slice 1D 不实现 emergency business override。
+
+## D-030 — Part master identity, classification and organization-scoped numbering
+
+状态：已确认（Accepted）
+日期：2026-08-21
+
+Slice 2A 建立 flat `PartCategory`、`PartMaster` 与 platform Numbering foundation。所有对象继续使用不可变内部 UUID；`partNumber` 由 Numbering 按 `organizationId + key` 原子分配，格式为 `PART-`、minimum width 6，从 1 开始，创建后 immutable。编号分配是独立短事务，成功分配即永久消费，允许非 gapless，不回滚、不复用；Numbering 不反向依赖业务模块且不写 allocation ledger 或 AuditLog。
+
+`PartCategory` 仅有 ACTIVE/INACTIVE，不实现层级；名称保存 trim 展示值并以 trim + lowercase 规范化，在 Organization 内唯一。`PartMaster` 的 `drawingNumber` 可选，展示值 trim、规范化值 trim + uppercase，在 Organization 内唯一且允许多个 NULL；`PartMaster(categoryId, organizationId)` 通过 composite FK 保证组织边界。Category 停用不级联 PartMaster，已有关系保留；PartMaster 与 Category 均不提供 delete；无业务值变化的 mutation 不写 Audit。
+
+Slice 2A 的 PartMaster 是 Organization-level enterprise master data；ENGINEER 获得 Category/PartMaster 的 view/create/update/set_status，QUALITY_MANAGER、INSPECTOR、VIEWER 只读，ADMIN 继续沿用同 Organization automatic ALL。Data Scope 为 ALL 且始终受 actor.organizationId 边界限制。所有真正业务 mutation 与 AuditLog 在同一 PostgreSQL transaction 中提交；跨 Organization direct UUID 统一表现为 RESOURCE.NOT_FOUND。SupplierRelation deferred；Slice 2B 引入 PartRevision 后重新审查已有 Revision 对 `drawingNumber` 修改的约束。

@@ -23,3 +23,9 @@ Slice 1C 的行为验收必须覆盖五个固定 Role、六种 Data Scope、mult
 Slice 1C 的 `AUTHZ-DB-01`～`AUTHZ-DB-07` 必须在真实 PostgreSQL 上证明 Migration objects、exact duplicate uniqueness、Account/Assignment 与 scope OrgUnit/Assignment 的 same-Organization composite FK、同 Account 多 Role、同 Role 多 OrgUnit scope，以及 concurrent exact assignment 最终恰有一行。不得以 Prisma schema 文本或函数名匹配替代数据库行为证据。
 
 数据库基础集成测试通过 `npm run test:db` 在真实 PostgreSQL 17 上运行，并仅从 `TEST_DATABASE_URL` 读取连接信息；测试代码不得回退读取 `DATABASE_URL`。`npm run db:migrate:test` 使用临时 Prisma schema 仅引用 `TEST_DATABASE_URL`，并以 `migrate deploy` 部署正式 Migration；不得运行 `migrate dev`、`migrate reset` 或 `db push`。测试 Client 必须独立于正式 Client，并通过 Prisma datasource 覆盖连接。DB-01 至 DB-04 使用固定专用 Schema 和测试表，以参数绑定验证 PostgreSQL 基础；Organization 的 ORG-DB 测试在同一隔离测试库中验证 Migration 约束、原子用例、层级不变式和 advisory lock 并发行为。所有异常路径均在 `finally` 清理，且不得使用 Unsafe Raw SQL。连接信息不得写入日志或已跟踪文件。
+
+## Slice 2A Part master / Numbering acceptance
+
+Slice 2A 的真实 PostgreSQL 验收必须覆盖 PART-DB-01～PART-DB-17：PartCategory Organization persistence、同组织 normalizedName 唯一与跨组织同名、PartMaster 与 Category composite FK 的跨组织拒绝、同组织 partNumber 与 normalizedDrawingNumber 唯一、多个 NULL 图号、跨组织同图号、同组织并发编号唯一且高水位严格增加、组织序列隔离、并发 PartMaster 创建 distinct partNumber、PartMaster/Category mutation 与 Audit 原子提交和失败回滚、Category INACTIVE 不级联既有 PartMaster，以及失败创建消耗号码且永不重发。
+
+编号并发证据必须证明真实 overlapping PostgreSQL requests 到达数据库 atomic allocation 边界，不能只使用 `Promise.all()`、sleep、settle 顺序、源码 grep 或 Prisma schema 文本匹配。行为/API/UI 验收还必须覆盖五角色权限矩阵、cross-Organization direct UUID 的 404、client-supplied protected fields、Category/PartMaster 状态语义、no-op mutation 无 Audit、drawingNumber NULL/value/change/clear、inactive Category 拒绝新建或重新指派、partNumber immutable、no delete，以及 PartMaster detail DTO 不泄露 organizationId、normalizedDrawingNumber 或 NumberingSequence。普通测试和真实 PostgreSQL 测试均必须保持 Slice 0～1D 基线不回归。
