@@ -1,0 +1,10 @@
+import { getPrismaClient } from "@/platform/database";
+import { definePermission } from "@/platform/authorization";
+import { createNumberingService } from "@/platform/numbering";
+import { createEquipmentServiceForPrisma } from "./infrastructure/equipment-prisma";
+export function createEquipmentService() { return createEquipmentServiceForPrisma(getPrismaClient(), createNumberingService()); }
+export const equipmentPermissions = Object.freeze({ view: definePermission({ code: "equipment.view", grants: [{ role: "ENGINEER", dataScope: "ALL" }, { role: "QUALITY_MANAGER", dataScope: "ALL" }, { role: "INSPECTOR", dataScope: "ALL" }, { role: "VIEWER", dataScope: "ALL" }] }), create: definePermission({ code: "equipment.create", grants: [{ role: "ENGINEER", dataScope: "ALL" }] }), update: definePermission({ code: "equipment.update", grants: [{ role: "ENGINEER", dataScope: "ALL" }] }), setStatus: definePermission({ code: "equipment.set_status", grants: [{ role: "ENGINEER", dataScope: "ALL" }] }) });
+export const equipmentPositionPermissions = Object.freeze({ view: definePermission({ code: "equipment_position.view", grants: [{ role: "ENGINEER", dataScope: "ALL" }, { role: "QUALITY_MANAGER", dataScope: "ALL" }, { role: "INSPECTOR", dataScope: "ALL" }, { role: "VIEWER", dataScope: "ALL" }] }), create: definePermission({ code: "equipment_position.create", grants: [{ role: "ENGINEER", dataScope: "ALL" }] }), update: definePermission({ code: "equipment_position.update", grants: [{ role: "ENGINEER", dataScope: "ALL" }] }), setStatus: definePermission({ code: "equipment_position.set_status", grants: [{ role: "ENGINEER", dataScope: "ALL" }] }) });
+export { equipmentError } from "./application/errors";
+export { assertEquipmentStatus, assertPositionStatus, equipmentNumberingPolicy, isUuid, optionalText, positionCode, requiredText } from "./domain/equipment";
+export type { EquipmentDto, EquipmentPositionDto, EquipmentService, EquipmentStatus, EquipmentPositionStatus, Page } from "./domain/equipment";

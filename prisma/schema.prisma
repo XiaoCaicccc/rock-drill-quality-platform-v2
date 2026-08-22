@@ -27,6 +27,8 @@ model Organization {
   partMasters PartMaster[]
   partRevisions PartRevision[]
   partRevisionReviews PartRevisionReview[]
+  equipment Equipment[]
+  equipmentPositions EquipmentPosition[]
 
   @@map("organization")
 }
@@ -178,6 +180,16 @@ enum PartRevisionReviewDecision {
   APPROVED
 }
 
+enum EquipmentStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum EquipmentPositionStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model NumberingSequence {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
@@ -278,4 +290,45 @@ model PartRevisionReview {
   @@index([organizationId, partRevisionId, decidedAt, id], map: "part_revision_review_organization_revision_decided_idx")
   @@index([reviewerAccountId, organizationId], map: "part_revision_review_reviewer_organization_idx")
   @@map("part_revision_review")
+}
+
+model Equipment {
+  id              String          @id @default(uuid()) @db.Uuid
+  organizationId  String          @db.Uuid
+  equipmentNumber String          @db.VarChar(64)
+  name            String          @db.VarChar(200)
+  model           String?         @db.VarChar(200)
+  description     String?         @db.VarChar(2000)
+  status          EquipmentStatus @default(ACTIVE)
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @updatedAt @db.Timestamptz(6)
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  positions       EquipmentPosition[]
+
+  @@unique([organizationId, equipmentNumber], map: "equipment_organization_id_equipment_number_key")
+  @@unique([id, organizationId], map: "equipment_id_organization_id_key")
+  @@index([organizationId, status], map: "equipment_organization_id_status_idx")
+  @@index([organizationId, name], map: "equipment_organization_id_name_idx")
+  @@map("equipment")
+}
+
+model EquipmentPosition {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  organizationId         String                  @db.Uuid
+  equipmentId            String                  @db.Uuid
+  positionCode           String                  @db.VarChar(100)
+  normalizedPositionCode String                  @db.VarChar(100)
+  name                   String                  @db.VarChar(200)
+  description            String?                 @db.VarChar(2000)
+  status                 EquipmentPositionStatus @default(ACTIVE)
+  createdAt              DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime                @updatedAt @db.Timestamptz(6)
+  organization           Organization            @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  equipment              Equipment               @relation(fields: [equipmentId, organizationId], references: [id, organizationId], onDelete: Restrict)
+
+  @@unique([equipmentId, normalizedPositionCode], map: "equipment_position_equipment_id_normalized_code_key")
+  @@unique([id, organizationId], map: "equipment_position_id_organization_id_key")
+  @@index([organizationId, equipmentId, status], map: "equipment_position_organization_equipment_status_idx")
+  @@index([equipmentId, name], map: "equipment_position_equipment_name_idx")
+  @@map("equipment_position")
 }

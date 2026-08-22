@@ -1,0 +1,5 @@
+import { createEquipmentService, equipmentPositionPermissions, type EquipmentPositionStatus } from "@/modules/equipment";
+import { createRequestContext } from "@/platform/request-context";
+import { assertOnlyKeys, authenticateRequest, errorResponse, readJsonObject, requireBusinessPermission, withRequestId } from "../../../auth/_shared";
+export const runtime = "nodejs";
+export async function PATCH(request: Request, { params }: { params: Promise<{ positionId: string }> }) { const base = createRequestContext(); try { const { context } = await authenticateRequest(request, base); await requireBusinessPermission(context, equipmentPositionPermissions.setStatus); const { positionId } = await params; const body = await readJsonObject(request); assertOnlyKeys(body, ["status"]); return withRequestId(Response.json(await createEquipmentService().setPositionStatus({ context, positionId, status: body.status as EquipmentPositionStatus })), context); } catch (error) { return withRequestId(errorResponse(error, base.requestId), base); } }

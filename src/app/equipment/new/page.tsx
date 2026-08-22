@@ -1,0 +1,2 @@
+import { AppNav } from "../../_components/app-nav"; import { NewEquipment } from "../../_components/equipment"; import { pageAuthorization } from "../../_auth"; import { equipmentPermissions } from "@/modules/equipment";
+export default async function Page() { const result = await pageAuthorization(equipmentPermissions.create, "/equipment"); return <><AppNav displayName={result.authenticated.account.displayName}/><main className="page"><NewEquipment/></main></>; }
