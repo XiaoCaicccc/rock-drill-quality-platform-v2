@@ -1,0 +1,5 @@
+import { createPartRevisionService, partRevisionPermissions } from "@/modules/part-revision";
+import { createRequestContext } from "@/platform/request-context";
+import { authenticateRequest, errorResponse, requireBusinessPermission, withRequestId } from "../../../auth/_shared";
+export const runtime = "nodejs";
+export async function GET(request: Request, { params }: { params: Promise<{ revisionId: string }> }) { const base = createRequestContext(); try { const { context } = await authenticateRequest(request, base); await requireBusinessPermission(context, partRevisionPermissions.view); const { revisionId } = await params; const query = new URL(request.url).searchParams; return withRequestId(Response.json(await createPartRevisionService().listReviews({ context, revisionId, ...(query.get("page") === null ? {} : { page: Number(query.get("page")) }), ...(query.get("pageSize") === null ? {} : { pageSize: Number(query.get("pageSize")) }) })), context); } catch (error) { return withRequestId(errorResponse(error, base.requestId), base); } }

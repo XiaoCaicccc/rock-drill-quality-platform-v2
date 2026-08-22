@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 
 import { createTransactionBoundAuditRecorder, type AuditEvent } from "@/platform/audit";
 import { AppError, type JsonObject } from "@/platform/errors";
@@ -33,6 +33,7 @@ function pageValue(value: number | undefined, fallback: number, max: number): nu
 }
 
 function mapError(error: unknown): never {
+  if (String(error).includes("PART_MASTER_DRAWING_NUMBER_LOCKED")) throw partMasterError("PART_MASTER_DRAWING_NUMBER_LOCKED", error);
   if (isPrismaError(error, "P2002")) {
     const target = prismaConflictTarget(error);
     const constraint = prismaConflictConstraint(error);
@@ -52,6 +53,12 @@ async function requirePart(client: PrismaClient | Prisma.TransactionClient, part
   const row = await client.partMaster.findFirst({ where: { id: partId, organizationId } });
   if (!row) throw partMasterError("PART_NOT_FOUND");
   return row;
+}
+
+async function lockPartMaster(transaction: PartTransaction, partId: string, organizationId: string) {
+  if (!isUuid(partId)) throw partMasterError("PART_NOT_FOUND");
+  const rows = await transaction.$queryRaw<{ id: string }[]>(Prisma.sql`SELECT id FROM part_master WHERE id = ${partId}::uuid AND "organizationId" = ${organizationId}::uuid FOR UPDATE`);
+  if (!rows[0]) throw partMasterError("PART_NOT_FOUND");
 }
 
 async function requireActiveCategory(dependencies: PartMasterDependencies, organizationId: string, categoryId: string) {
@@ -111,6 +118,7 @@ export function createPartMasterServiceForPrisma(prisma: PrismaClient, dependenc
       if (input.categoryId !== undefined && (typeof input.categoryId !== "string" || input.categoryId.trim().length === 0)) throw partMasterError("INVALID_PART_INPUT");
       try {
         const row = await prisma.$transaction(async (transaction) => {
+          await lockPartMaster(transaction, input.partId, currentActor.organizationId);
           const existing = await requirePart(transaction, input.partId, currentActor.organizationId);
           if (input.categoryId !== undefined && input.categoryId !== existing.categoryId) category = await requireActiveCategory(dependencies, currentActor.organizationId, input.categoryId);
           const changed = (name !== undefined && name !== existing.name) || (description !== undefined && description !== existing.description) || (drawing !== undefined && (drawing.drawingNumber !== existing.drawingNumber || drawing.normalizedDrawingNumber !== existing.normalizedDrawingNumber)) || (category !== undefined && category.id !== existing.categoryId);
@@ -133,6 +141,7 @@ export function createPartMasterServiceForPrisma(prisma: PrismaClient, dependenc
       try { assertPartMasterStatus(input.status); } catch (cause) { throw partMasterError("INVALID_PART_INPUT", cause); }
       try {
         const row = await prisma.$transaction(async (transaction) => {
+          await lockPartMaster(transaction, input.partId, currentActor.organizationId);
           const existing = await requirePart(transaction, input.partId, currentActor.organizationId);
           if (existing.status === input.status) return existing;
           const updated = await transaction.partMaster.update({ where: { id: existing.id }, data: { status: input.status } });

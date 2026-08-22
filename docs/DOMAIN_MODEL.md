@@ -23,6 +23,13 @@
 - Category status 只阻止新建或重新指派到 INACTIVE Category；已有关系保留。PartMaster status 与 Category status 独立，均允许 ACTIVE ↔ INACTIVE。无业务值变化的 mutation 返回当前 resource 且不写 Audit。
 - Slice 2B 引入 PartRevision 后，必须重新审查已有 Revision 的 PartMaster 是否仍允许任意修改 `drawingNumber`；2A 不实现 Revision existence check、released revision lock 或 revision lifecycle。
 
+## Slice 2B Part revision lifecycle
+
+- `PartRevision.id` is the immutable cross-module UUID. `revisionNo` is only a PartMaster-scoped integer sequence, starts at 1, and is never a foreign key or enterprise code. Every Revision and Review carries `organizationId` and uses composite database foreign keys to preserve the Organization boundary.
+- A PartMaster has at most one non-`RELEASED` Revision. Legal transitions are only `DRAFT -> REVIEWING`, `RETURNED -> REVIEWING`, `REVIEWING -> RETURNED`, `REVIEWING -> APPROVED`, and `APPROVED -> RELEASED`; all other transitions conflict. Only `DRAFT` and `RETURNED` may change `changeSummary`; no-op PATCH is not an Audit event.
+- `PartRevisionReview` is an append-only decision record for RETURN/APPROVE. The creator cannot ordinarily review their own Revision; an ADMIN must make an explicit override with a non-empty reason, which becomes visible Review/Audit history. Review and release remain separate steps.
+- `RELEASED` is permanently immutable. PartMaster must be ACTIVE for create and forward lifecycle transitions. Once any Revision exists, `drawingNumber` is frozen; PartMaster name, description and category retain their Slice 2A semantics.
+
 ### Slice 1B Account / Session
 
 - 正式身份实体为 `Account`，不创建第二套 `User` 身份对象。Account 必须属于一个 Organization，并有一个属于同一 Organization 的 primary OrgUnit。

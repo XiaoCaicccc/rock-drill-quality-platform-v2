@@ -25,6 +25,8 @@ model Organization {
   numberingSequences NumberingSequence[]
   partCategories PartCategory[]
   partMasters PartMaster[]
+  partRevisions PartRevision[]
+  partRevisionReviews PartRevisionReview[]
 
   @@map("organization")
 }
@@ -83,6 +85,9 @@ model Account {
   sessions          Session[]
   roleAssignments   AccountRoleAssignment[] @relation("AccountRoleAssignments")
   actorAuditLogs    AuditLog[]               @relation("AuditActorAccount")
+  createdPartRevisions PartRevision[]        @relation("PartRevisionCreator")
+  releasedPartRevisions PartRevision[]       @relation("PartRevisionReleaser")
+  partRevisionReviews PartRevisionReview[]   @relation("PartRevisionReviewer")
 
   @@unique([id, organizationId], map: "account_id_organization_id_key")
   @@index([organizationId], map: "account_organization_id_idx")
@@ -160,6 +165,19 @@ enum PartMasterStatus {
   INACTIVE
 }
 
+enum PartRevisionStatus {
+  DRAFT
+  REVIEWING
+  RETURNED
+  APPROVED
+  RELEASED
+}
+
+enum PartRevisionReviewDecision {
+  RETURNED
+  APPROVED
+}
+
 model NumberingSequence {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
@@ -206,6 +224,7 @@ model PartMaster {
   updatedAt               DateTime        @updatedAt @db.Timestamptz(6)
   organization            Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   category                PartCategory    @relation(fields: [categoryId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  revisions               PartRevision[]
 
   @@unique([organizationId, partNumber], map: "part_master_organization_id_part_number_key")
   @@unique([organizationId, normalizedDrawingNumber], map: "part_master_organization_id_normalized_drawing_number_key")
@@ -214,4 +233,49 @@ model PartMaster {
   @@index([organizationId, categoryId], map: "part_master_organization_id_category_id_idx")
   @@index([organizationId, name], map: "part_master_organization_id_name_idx")
   @@map("part_master")
+}
+
+model PartRevision {
+  id                  String             @id @default(uuid()) @db.Uuid
+  organizationId      String             @db.Uuid
+  partMasterId        String             @db.Uuid
+  revisionNo          Int
+  status              PartRevisionStatus @default(DRAFT)
+  changeSummary       String             @db.VarChar(2000)
+  createdByAccountId  String             @db.Uuid
+  createdAt           DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime           @updatedAt @db.Timestamptz(6)
+  lastSubmittedAt     DateTime?          @db.Timestamptz(6)
+  releasedByAccountId String?            @db.Uuid
+  releasedAt          DateTime?          @db.Timestamptz(6)
+  organization        Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  partMaster          PartMaster         @relation(fields: [partMasterId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  createdBy           Account            @relation("PartRevisionCreator", fields: [createdByAccountId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  releasedBy          Account?           @relation("PartRevisionReleaser", fields: [releasedByAccountId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  reviews             PartRevisionReview[]
+
+  @@unique([partMasterId, revisionNo], map: "part_revision_part_master_id_revision_no_key")
+  @@unique([id, organizationId], map: "part_revision_id_organization_id_key")
+  @@index([organizationId, partMasterId, status], map: "part_revision_organization_part_master_status_idx")
+  @@map("part_revision")
+}
+
+model PartRevisionReview {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  organizationId          String                     @db.Uuid
+  partRevisionId          String                     @db.Uuid
+  reviewerAccountId       String                     @db.Uuid
+  decision                PartRevisionReviewDecision
+  comment                 String?                    @db.VarChar(2000)
+  creatorReviewOverride   Boolean                    @default(false)
+  overrideReason          String?                    @db.VarChar(500)
+  decidedAt               DateTime                   @default(now()) @db.Timestamptz(6)
+  organization            Organization               @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  revision                PartRevision               @relation(fields: [partRevisionId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  reviewer                Account                    @relation("PartRevisionReviewer", fields: [reviewerAccountId, organizationId], references: [id, organizationId], onDelete: Restrict)
+
+  @@unique([id, organizationId], map: "part_revision_review_id_organization_id_key")
+  @@index([organizationId, partRevisionId, decidedAt, id], map: "part_revision_review_organization_revision_decided_idx")
+  @@index([reviewerAccountId, organizationId], map: "part_revision_review_reviewer_organization_idx")
+  @@map("part_revision_review")
 }
