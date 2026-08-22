@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-V2 实施路线已冻结；Slice 1A、Slice 1B、Slice 1C 与 Slice 1D 均已完成。Slice 1D — User Management / Audit Foundation 已由 PR #9 合并进入 `master`，状态为 `CLOSED / completed`。Slice 2A — Part Category / Part Master / Numbering Foundation 已由 PR #10 使用普通 merge commit `60526c8dcde5a8730b97de78879c2479dae87762` 合并进入 `master`，状态为 `CLOSED / completed`；其 GitHub Actions isolated PostgreSQL 17 verification 已 PASS。active implementation: `NONE`。Slice 2B — Part Revision lifecycle：`HUMAN_GATE_START = APPROVED / AUTHORIZED / NOT ACTIVE`。数据库基础继续采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离。
+V2 实施路线已冻结；Slice 1A、Slice 1B、Slice 1C 与 Slice 1D 均已完成。Slice 1D — User Management / Audit Foundation 已由 PR #9 合并进入 `master`，状态为 `CLOSED / completed`。Slice 2A — Part Category / Part Master / Numbering Foundation 已由 PR #10 使用普通 merge commit `60526c8dcde5a8730b97de78879c2479dae87762` 合并进入 `master`，状态为 `CLOSED / completed`；其 GitHub Actions isolated PostgreSQL 17 verification 已 PASS。Slice 2B — Part Revision lifecycle 当前处于 `CLOSURE`；Draft PR #11 的 implementation CI 已绑定提交 `3d971a45f0a0c240786bbd30bc1ddddbf21767dc` 并 PASS，closure commit 与 final CI 尚未完成；active implementation: `Slice 2B`。Slice 2C 保持 `NOT ACTIVE`。数据库基础继续采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离。
 
 ## 权威入口
 
