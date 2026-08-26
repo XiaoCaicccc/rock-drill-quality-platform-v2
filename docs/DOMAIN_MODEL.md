@@ -33,7 +33,7 @@
 ## Slice 2C Equipment and EquipmentPosition foundation
 
 - `Equipment.id` is the immutable UUID; `equipmentNumber` is a server-generated, immutable Organization-scoped `EQ-` number allocated atomically and monotonically (non-gapless). Equipment has independent `ACTIVE` / `INACTIVE` status and no product hard delete.
-- `EquipmentPosition` is flat: it has an immutable `equipmentId` and `organizationId`, and `(equipmentId, organizationId)` is a composite FK to the parent Equipment. `positionCode` preserves trimmed display value; `normalizedPositionCode` is uppercase trim and unique per Equipment. Position code may be reused on another Equipment.
+- `EquipmentPosition` is flat: it has an immutable `equipmentId` and `organizationId`, and `(equipmentId, organizationId)` is a composite FK to the parent Equipment. `positionCode` preserves trimmed display value; `normalizedPositionCode` is trim plus a locale-independent ASCII `a-z` → `A-Z` fold, with every non-ASCII code point preserved, and is unique per Equipment. Position code may be reused on another Equipment.
 - Creating or reactivating a Position requires an ACTIVE parent Equipment. Deactivating or reactivating Equipment never cascades Position status. Effective future usability is `Equipment.ACTIVE && EquipmentPosition.ACTIVE`; inactive parents still permit reads, metadata edits and Position deactivation.
 - Equipment status and Position create serialize on the Equipment row. Position reactivation locks Equipment then Position; Position metadata and ACTIVE-to-INACTIVE lock Position only. Real business state no-ops return the current resource without Audit.
 

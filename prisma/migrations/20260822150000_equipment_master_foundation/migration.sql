@@ -34,7 +34,7 @@ CREATE TABLE "equipment_position" (
   CONSTRAINT "equipment_position_organization_id_fkey" FOREIGN KEY ("organizationId") REFERENCES "organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT "equipment_position_equipment_organization_fkey" FOREIGN KEY ("equipmentId", "organizationId") REFERENCES "equipment"("id", "organizationId") ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT "equipment_position_code_trim_check" CHECK ("positionCode" = btrim("positionCode") AND char_length("positionCode") BETWEEN 1 AND 100),
-  CONSTRAINT "equipment_position_normalized_code_check" CHECK ("normalizedPositionCode" = upper(btrim("positionCode")))
+  CONSTRAINT "equipment_position_normalized_code_check" CHECK ("normalizedPositionCode" = translate(btrim("positionCode"), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
 );
 
 CREATE INDEX "equipment_organization_id_status_idx" ON "equipment"("organizationId", "status");

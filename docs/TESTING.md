@@ -38,6 +38,6 @@ Slice 2B 必须以真实 PostgreSQL 证明 REV-DB-01～REV-DB-20：Revision/Revi
 
 ## Slice 2C Equipment / EquipmentPosition acceptance
 
-真实 PostgreSQL 验收必须覆盖冻结的 `EQUIP-DB-01`～`EQUIP-DB-18`：Organization-scoped `EQ-` 编号及跨 Organization 重用、Equipment/Position composite FK、Position normalized-code uniqueness、并发编号与失败后号码消费、业务/Audit 原子性、ACTIVE parent 前置条件、Equipment/Position race serialization、无状态级联、并发 code 冲突精确映射和无硬删除。`EQUIP-DB-06`、`12`、`14`、`16` 必须使用独立连接、backend PID、`pg_stat_activity`、`pg_locks`、`pg_blocking_pids` 与必要时 recursive blocker chain 的真实 PostgreSQL 证据；不得以 Promise settle 顺序或 sleep 代替。
+真实 PostgreSQL 验收必须覆盖冻结的 `EQUIP-DB-01`～`EQUIP-DB-18`：Organization-scoped `EQ-` 编号及跨 Organization 重用、Equipment/Position composite FK、Position normalized-code uniqueness、并发编号与失败后号码消费、业务/Audit 原子性、ACTIVE parent 前置条件、Equipment/Position race serialization、无状态级联、并发 code 冲突精确映射和无硬删除。Position normalization is trim plus locale-independent ASCII `a-z` → `A-Z`; non-ASCII code points are preserved and must be proven against PostgreSQL. `EQUIP-DB-06`、`12`、`14`、`16` 必须使用独立连接、backend PID、`pg_stat_activity`、`pg_locks`、`pg_blocking_pids` 与必要时 recursive blocker chain 的真实 PostgreSQL 证据；不得以 Promise settle 顺序或 sleep 代替。
 
 API/UI 与 Audit 验收必须覆盖 401、五角色矩阵、same-Organization ADMIN、IDOR 404、foreign nested parent 404、protected fields 400、无 DELETE surface、分页安全性、`equipment.*` 与 `equipment_position.*` 的 create/update/status Audit，以及所有业务 no-op 无 Audit。Slice 0～2B regression、`db:validate`、`db:generate`、`check:full` 与完整数据库测试必须保持通过。
