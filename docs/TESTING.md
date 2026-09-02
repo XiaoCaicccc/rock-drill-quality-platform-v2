@@ -35,3 +35,9 @@ Slice 2A 的真实 PostgreSQL 验收必须覆盖 PART-DB-01～PART-DB-17：PartC
 Slice 2B 必须以真实 PostgreSQL 证明 REV-DB-01～REV-DB-20：Revision/Review 的 Organization composite FK、PartMaster 内 revisionNo 唯一、不同 PartMaster 的独立编号、partial unique 单一未发布版本、首版及下一版并发创建、drawingNumber 与首版创建竞争、drawingNumber freeze 的应用与数据库守卫、INACTIVE PartMaster 前置条件、状态与更新/审核竞争、RETURN/APPROVE 单胜、Review/Audit/状态或 release metadata 的原子提交与强制 Audit failure 回滚、RELEASED 不可变、多次退回/重提保留历史，以及 creator-review 分离和带 reason 的 ADMIN override。并发验收必须以独立 PostgreSQL connections、目标 row-lock 到达和数据库锁/等待事实证明，而不是 Promise settle 顺序。
 
 行为、API 与 UI 测试还必须覆盖全部合法/非法 transition、状态化 editability、权限矩阵和 IDOR、protected fields、no-op 无 Audit、Review DTO 无持久化泄露、return comment、approve optional comment、release prerequisite，以及 `npm run db:validate`、`npm run db:generate`、`npm run check:full` 和 PART-DB-01～PART-DB-17 回归。
+
+## Slice 2C Equipment / EquipmentPosition acceptance
+
+真实 PostgreSQL 验收必须覆盖冻结的 `EQUIP-DB-01`～`EQUIP-DB-18`：Organization-scoped `EQ-` 编号及跨 Organization 重用、Equipment/Position composite FK、Position normalized-code uniqueness、并发编号与失败后号码消费、业务/Audit 原子性、ACTIVE parent 前置条件、Equipment/Position race serialization、无状态级联、并发 code 冲突精确映射和无硬删除。Position normalization is trim plus locale-independent ASCII `a-z` → `A-Z`; non-ASCII code points are preserved and must be proven against PostgreSQL. `EQUIP-DB-06`、`12`、`14`、`16` 必须使用独立连接、backend PID、`pg_stat_activity`、`pg_locks`、`pg_blocking_pids` 与必要时 recursive blocker chain 的真实 PostgreSQL 证据；不得以 Promise settle 顺序或 sleep 代替。
+
+API/UI 与 Audit 验收必须覆盖 401、五角色矩阵、same-Organization ADMIN、IDOR 404、foreign nested parent 404、protected fields 400、无 DELETE surface、分页安全性、`equipment.*` 与 `equipment_position.*` 的 create/update/status Audit，以及所有业务 no-op 无 Audit。Slice 0～2B regression、`db:validate`、`db:generate`、`check:full` 与完整数据库测试必须保持通过。

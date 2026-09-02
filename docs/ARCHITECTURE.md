@@ -68,6 +68,10 @@ Slice 2A 的 PLM 依赖方向为 `PartMaster -> PartCategory public API -> platf
 
 `src/modules/part-revision` owns Revision state, immutable Review decisions, revision DTOs and permission policies. Slice 2B additionally owns a slice-local transaction composition adapter in its infrastructure boundary: it alone holds the Prisma transaction, PartMaster/Revision/Review persistence access, row locks and transaction-bound Audit recorder for lifecycle use cases. The PartRevision application/domain receives only narrow typed lifecycle capabilities; no Prisma type, transaction client or SQL crosses its contracts or public index. CREATE locks PartMaster then creates Revision; SUBMIT/APPROVE/RELEASE lock PartMaster then Revision; RETURN and Revision update lock Revision only; reads take no business row lock. PartMaster never imports or queries PartRevision; its own update/status transaction locks and fresh-reads PartMaster, while the database trigger is the final drawing-number freeze guard. This adapter is neither a business-module cycle nor a global UnitOfWork, generic transaction callback, arbitrary model executor or SQL facade. Authorization, Audit, Time and Database remain public platform capabilities; API/UI compose only public services and DTOs.
 
+### Slice 2C Equipment boundary
+
+`src/modules/equipment` owns both Equipment and flat EquipmentPosition, their permission policies, DTOs, API/UI contracts and a narrow module-local transaction composition adapter. The adapter alone owns Prisma transactions, row locks, persistence and transaction-bound Audit recording; public and application contracts expose no Prisma Client, TransactionClient or raw SQL. It reuses only the platform Numbering, Authorization, Audit, Time and Database public APIs. Equipment status and Position create lock Equipment; Position reactivation locks Equipment then Position; Position metadata and deactivation lock Position only. This is not a global UnitOfWork and does not create a separate EquipmentPosition module.
+
 领域层不得依赖 Prisma、Next.js 或 React；应用层不得依赖 Next.js 页面和路由；基础设施层可以依赖 Prisma；`app` 层组合应用能力；平台模块不得反向依赖具体 PLM 或质量业务模块。
 
 ## Repository 规则
