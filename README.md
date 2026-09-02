@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-V2 实施路线已冻结；Slice 1A、Slice 1B、Slice 1C 与 Slice 1D 均已完成。Slice 1D — User Management / Audit Foundation 已由 PR #9 合并进入 `master`，状态为 `CLOSED / completed`。Slice 2A — Part Category / Part Master / Numbering Foundation 已由 PR #10 使用普通 merge commit `60526c8dcde5a8730b97de78879c2479dae87762` 合并进入 `master`，状态为 `CLOSED / completed`；其 GitHub Actions isolated PostgreSQL 17 verification 已 PASS。Slice 2B — Part Revision lifecycle 已由 PR #11 使用普通 merge commit `d9e9b33995803869cb1396a967d93d1814570307` 合并进入 `master`，状态为 `CLOSED / completed`；active implementation: `NONE`。Slice 2C — Equipment / EquipmentPosition Foundation 的 Draft PR #12 implementation CI 已 PASS，现为 `CLOSURE / awaiting closure CI`。数据库基础继续采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离。
+V2 实施路线已冻结；Slice 1A、Slice 1B、Slice 1C 与 Slice 1D 均已完成。Slice 1D — User Management / Audit Foundation 已由 PR #9 合并进入 `master`，状态为 `CLOSED / completed`。Slice 2A — Part Category / Part Master / Numbering Foundation 已由 PR #10 使用普通 merge commit `60526c8dcde5a8730b97de78879c2479dae87762` 合并进入 `master`，状态为 `CLOSED / completed`；其 GitHub Actions isolated PostgreSQL 17 verification 已 PASS。Slice 2B — Part Revision lifecycle 已由 PR #11 使用普通 merge commit `d9e9b33995803869cb1396a967d93d1814570307` 合并进入 `master`，状态为 `CLOSED / completed`。Slice 2C — Equipment / EquipmentPosition Foundation 已由 PR #12 使用普通 merge commit `b776c7690b5542136117f3d46f05e7c521146cf8` 合并进入 `master`，状态为 `CLOSED / completed`；active implementation: `NONE`。数据库基础继续采用 PostgreSQL 17 与 Prisma 6.19.3，`DATABASE_URL` 与 `TEST_DATABASE_URL` 严格分离。
 
 ## 权威入口
 
